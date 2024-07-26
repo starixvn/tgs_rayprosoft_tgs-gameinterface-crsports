@@ -1,0 +1,171 @@
+﻿syntax = "proto3";
+
+import "phoenix/protobuf/decimal.proto";
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "Tgs.GameInterface.GlobalTechnology.Protos";
+
+package GameInterfaceGlobalTechnology;
+
+service GameInterfaceGlobalTechnology {
+	rpc PlayerCreate (PlayerCreateRequest) returns (BaseReply);
+	rpc PlayerBalance (PlayerBalanceRequest) returns (PlayerBalanceReply);
+	rpc PlayerLogout (PlayerLogoutRequest) returns (BaseReply);
+	rpc FundOut(FundRequest) returns (FundReply);
+	rpc FundIn (FundRequest) returns (FundReply);
+	rpc FundStatus(FundStatusRequest) returns (BaseReply);
+	rpc GameUrl (GameUrlRequest) returns (GameUrlReply);
+	rpc GameRecord (GameRecordRequest) returns (GameRecordReply);
+	rpc CheckingService(CheckingServiceRequest) returns (CheckingServiceReply);
+}
+
+message AGLoginRequest {
+  string api_url = 1;
+  int32 agent_id = 2;
+  string secret_key = 3;
+  string agent_account = 4;
+  string agent_password = 5;
+}
+
+message PlayerCreateRequest {
+  string api_url = 1;
+  int32 agent_id = 2;
+  string secret_key = 3;
+  string agent_account = 4;
+  string agent_password = 5;
+  string player_code = 6;
+  string password = 7;
+  string currency = 8;
+}
+
+message PlayerBalanceRequest {
+  string api_url = 1;
+  int32 brand_id = 2;
+  string secret_key = 3;
+  string player_code = 4;
+}
+
+message PlayerLogoutRequest  {
+  string api_url = 1;
+  int32 brand_id = 2;
+  string secret_key = 3;
+  string player_code = 4;
+}
+
+message FundRequest {
+  string api_url = 1;
+  int32 brand_id = 2;
+  string secret_key = 3;
+  string player_code = 4;
+  string currency = 5;
+  string order_id = 6;
+  phoenix.protobuf.DecimalValue amount = 7;
+}
+
+message FundStatusRequest {
+  string api_url = 1;
+  int32 brand_id = 2;
+  string secret_key = 3;
+  string order_id = 4;
+}
+
+message GameUrlRequest {
+  string api_url = 1;
+  string launcher_api_url = 2;
+  int32 brand_id = 3;
+  string secret_key = 4;
+  string player_code = 5;
+  string currency = 6;
+  string language = 7;
+  bool is_mobile = 8;
+  string game_code = 9;
+}
+
+message GameUrlPlaytechByLiveRequest {
+  string api_url = 1;
+  string launcher_api_url = 2;
+  int32 brand_id = 3;
+  string secret_key = 4;
+  string player_code = 5;
+  string currency = 6;
+  string language = 7;
+  bool is_mobile = 8;
+}
+
+message GameRecordRequest {
+  string data_api_url = 1;
+  int32 brand_id = 2;
+  string secret_key = 3;
+  google.protobuf.Timestamp start_time = 4; 
+  google.protobuf.Timestamp end_time = 5;
+  int32 page = 6;
+  int32 page_size = 7;
+}
+
+message GameRecordDetailRequest {
+  string data_api_url = 1;
+  int32 brand_id = 2;
+  string secret_key = 3;
+  string external_provider_code = 4;
+  string external_bet_id = 5;
+  google.protobuf.Timestamp external_end_time = 6;
+  string language = 7;
+}
+
+message CheckingServiceRequest{
+  string machine_name = 1;
+}
+
+message BaseReply{
+  bool status = 1;
+}
+
+message PlayerBalanceReply {
+	bool is_player_exist = 1;
+	phoenix.protobuf.DecimalValue balance = 2;
+}
+
+message FundReply {
+	string order_id = 1;
+	string external_order_id = 2;
+	phoenix.protobuf.DecimalValue balance = 3;
+	string resp = 4;
+}
+
+message GameUrlReply {
+	bool is_player_exist = 1;
+	string game_url = 2;
+}
+
+message GameRecordReply {
+  repeated GameRecordInfo items = 1;
+}
+
+message GameRecordInfo {
+	string player_code = 1;
+	string external_bet_id = 2;
+	string external_game_id = 3;
+	google.protobuf.Timestamp external_created_on = 4;
+	google.protobuf.Timestamp external_closed_on = 5;
+	bool is_free_game = 6;
+	bool is_bonus_game = 7;
+	phoenix.protobuf.DecimalValue bet = 8;
+	phoenix.protobuf.DecimalValue settle = 9;
+	phoenix.protobuf.DecimalValue win_loss = 10;
+	phoenix.protobuf.DecimalValue jackpot_contribution = 11;
+	phoenix.protobuf.DecimalValue jackpot_win = 12;
+	string additional_data = 13;
+}
+
+message GameRecordDetailReply {
+	bool is_support = 1;
+	string detail_url = 2;
+}
+
+message CheckingServiceReply{
+  string machine_name = 1;
+}
+
+message AGLoginReply {
+  string token = 1;
+}

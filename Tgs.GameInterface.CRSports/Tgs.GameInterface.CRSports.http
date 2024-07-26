@@ -1,0 +1,6 @@
+@Tgs.GameInterface.CRSports_HostAddress = http://localhost:5095
+
+GET {{Tgs.GameInterface.CRSports_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

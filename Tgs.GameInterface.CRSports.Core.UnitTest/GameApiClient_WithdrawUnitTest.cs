@@ -1,0 +1,123 @@
+﻿using System.Net;
+using System.Text.Json.Nodes;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
+using NSubstitute;
+using RichardSzalay.MockHttp;
+using Tgs.GameInterface.GlobalTechnology.Core;
+
+namespace Tgs.GameInterface.CRSports.Core.UnitTest;
+
+public class GameApiClient_WithdrawUnitTest
+{
+	[Fact]
+	public async Task Normal_Process()
+	{
+		var fakePolicySettingsOptions = Options.Create(new PolicySettingsOptions
+		{
+			GlobalRetryCount = 1,
+			GlobalRetryWaitSec = 1,
+		});
+		var fakeGameInterfaceOptions = Options.Create(new GameInterfaceOptions
+		{
+			PlayerPassword = "TgsPassw0rd"
+		});
+		var fakeTimeProvider = Substitute.For<TimeProvider>();
+		var dateTimeConverter = new DateTimeConverter();
+		var fakeTokenUtensil = Substitute.For<ITokenUtensil>();
+		var fakeCryptographyUtensil = Substitute.For<ICryptographyUtensil>();
+
+		var apiBaseUrl = new Uri("https://api.orb-6789.com/");
+		var agentId = 3238;
+		var secretKey = "FnzrUTi5fcsdrws7";
+		var agentAccount = "RT706test1";
+		var agentPassword = "aaa123";
+		var memname = "4uf6k014jp5x";
+		var payno = "29CDE229-AE62-49BA-B03B-2EB7288C0058";
+		var amount = 10.00m;
+
+		var timeProvider = DateTimeOffset.FromUnixTimeMilliseconds(1721976666753);
+		_ = fakeTimeProvider.GetUtcNow().Returns(timeProvider);
+
+		var token = Guid.NewGuid().ToString("N");
+		_ = fakeTokenUtensil.GetTokenAsync(
+			apiBaseUrl: Arg.Is(apiBaseUrl),
+			agentId: Arg.Is(agentId),
+			secretKey: Arg.Is(secretKey),
+			agentAccount: Arg.Is(agentAccount),
+			agentPassword: Arg.Is(agentPassword),
+			cancellationToken: Arg.Any<CancellationToken>())
+			.Returns(token);
+
+		var encrypt = Guid.NewGuid().ToString("N");
+		_ = fakeCryptographyUtensil.Encrypt(
+			source: Arg.Is<JsonNode>(content => content["memname"]!.GetValue<string>() == memname &&
+				content["payno"]!.GetValue<string>() == payno &&
+				content["amount"]!.GetValue<decimal>() == amount &&
+				content["token"]!.GetValue<string>() == token &&
+				content["timestamp"]!.GetValue<string>() == timeProvider.ToUnixTimeMilliseconds().ToString()),
+			Arg.Is(secretKey))
+			.Returns(encrypt);
+		var responseContent = Guid.NewGuid().ToString("N");
+		var handler = new MockHttpMessageHandler();
+		handler.Expect(HttpMethod.Post, new Uri(apiBaseUrl, "/app/control_API/agents/api_doaction.php").ToString())
+			.WithJsonContent<JsonObject>(content =>
+				content["Request"]!.GetValue<string>() == encrypt &&
+				content["Method"]!.GetValue<string>() == "Withdraw" &&
+				content["AGID"]!.GetValue<string>() == agentId.ToString())
+			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
+		var httpClient = handler.ToHttpClient();
+
+		var Decrypt = JsonNode.Parse("""
+			{
+				"method": "Withdraw",
+				"responeid": "22681727334",
+				"respcode": "0000",
+				"moneydata": {
+					"gold": "189.0",
+					"payno": "29CDE229-AE62-49BA-B03B-2EB7288C0058",
+					"pay_gold": "10.0",
+					"currency": "HKD",
+					"pay_way": "-1",
+					"recid": "264552615",
+					"username": "4uf6k014jp5x"
+				},
+				"status": "success",
+				"timestamp": "1721979994842"
+			}
+			""");
+		_ = fakeCryptographyUtensil.Decrypt(
+			Arg.Is(responseContent),
+			Arg.Is(secretKey))
+			.Returns(Decrypt);
+
+		var fakerLogger = NullLogger<GameApiClient>.Instance;
+		var apiClient = new GameApiClient(
+			fakerLogger,
+			fakePolicySettingsOptions,
+			fakeGameInterfaceOptions,
+			fakeTimeProvider,
+			dateTimeConverter,
+			fakeTokenUtensil,
+			fakeCryptographyUtensil,
+			httpClient);
+
+		var actual = await apiClient.WithdrawAsync(
+			apiBaseUrl: apiBaseUrl,
+			agentId: agentId,
+			secretKey: secretKey,
+			agentAccount: agentAccount,
+			agentPassword: agentPassword,
+			memname: memname,
+			payno: payno,
+			amount: amount,
+			cancellationToken: default)
+			.ConfigureAwait(true);
+
+		Assert.NotNull(actual);
+		Assert.Equal(189.0m, actual.Gold);
+		Assert.Equal(payno, actual.Payno);
+		Assert.Equal("264552615", actual.Recid);
+		Assert.NotEmpty(actual.Resp);
+	}
+}
