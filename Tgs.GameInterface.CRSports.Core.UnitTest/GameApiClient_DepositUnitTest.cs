@@ -68,7 +68,7 @@ public class GameApiClient_DepositUnitTest
 			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
 		var httpClient = handler.ToHttpClient();
 
-		var Decrypt = JsonNode.Parse("""
+		var decrypt = JsonNode.Parse("""
 			{
 				"method": "Deposit",
 				"responeid": "23681717965",
@@ -89,7 +89,7 @@ public class GameApiClient_DepositUnitTest
 		_ = fakeCryptographyUtensil.Decrypt(
 			Arg.Is(responseContent),
 			Arg.Is(secretKey))
-			.Returns(Decrypt);
+			.Returns(decrypt);
 
 		var fakerLogger = NullLogger<GameApiClient>.Instance;
 		var apiClient = new GameApiClient(

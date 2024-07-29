@@ -67,7 +67,7 @@ public class GameApiClient_WithdrawUnitTest
 			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
 		var httpClient = handler.ToHttpClient();
 
-		var Decrypt = JsonNode.Parse("""
+		var decrypt = JsonNode.Parse("""
 			{
 				"method": "Withdraw",
 				"responeid": "22681727334",
@@ -88,7 +88,7 @@ public class GameApiClient_WithdrawUnitTest
 		_ = fakeCryptographyUtensil.Decrypt(
 			Arg.Is(responseContent),
 			Arg.Is(secretKey))
-			.Returns(Decrypt);
+			.Returns(decrypt);
 
 		var fakerLogger = NullLogger<GameApiClient>.Instance;
 		var apiClient = new GameApiClient(

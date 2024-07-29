@@ -65,7 +65,7 @@ public class GameApiClient_AGLoginUnitTest
 			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
 		var httpClient = handler.ToHttpClient();
 
-		var Decrypt = JsonNode.Parse("""
+		var decrypt = JsonNode.Parse("""
 			{
 				"method": "AGLogin",
 				"responeid": "18837756570",
@@ -80,7 +80,7 @@ public class GameApiClient_AGLoginUnitTest
 		_ = fakeCryptographyUtensil.Decrypt(
 			Arg.Is(responseContent),
 			Arg.Is(secretKey))
-			.Returns(Decrypt);
+			.Returns(decrypt);
 
 		var fakerLogger = NullLogger<GameApiClient>.Instance;
 		var apiClient = new GameApiClient(

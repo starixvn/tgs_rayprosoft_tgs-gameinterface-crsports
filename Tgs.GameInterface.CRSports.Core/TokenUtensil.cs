@@ -6,6 +6,7 @@ namespace Tgs.GameInterface.CRSports.Core;
 
 internal class TokenUtensil(
 	IDatabase database,
+	TimeSpan expiry,
 	IMessageSender messageSender) : ITokenUtensil
 {
 	private readonly SemaphoreSlim _semaphore = new(1, 1);
@@ -26,7 +27,7 @@ internal class TokenUtensil(
 			{
 				if (!await database.KeyExistsAsync(key).ConfigureAwait(false))
 				{
-					var token = await messageSender.RequestAsync<AGLoginRequest, AGLoginReply>(
+					var reply = await messageSender.RequestAsync<AGLoginRequest, AGLoginReply>(
 						"gp.gameinterface.cr.aglogin",
 						new AGLoginRequest
 						{
@@ -41,11 +42,11 @@ internal class TokenUtensil(
 
 					await database.StringSetAsync(
 						key: key,
-						value: token.Token,
-						expiry: TimeSpan.FromMinutes(10))
+						value: reply.Token,
+						expiry: expiry)
 						.ConfigureAwait(false);
 
-					return token.Token;
+					return reply.Token;
 				}
 			}
 			finally

@@ -67,7 +67,7 @@ public class GameApiClient_PlayerCreateUnitTest
 			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
 		var httpClient = handler.ToHttpClient();
 
-		var Decrypt = JsonNode.Parse("""
+		var decrypt = JsonNode.Parse("""
 			{
 				"Error": "success",
 				"responeid": "20837684617",
@@ -78,7 +78,7 @@ public class GameApiClient_PlayerCreateUnitTest
 		_ = fakeCryptographyUtensil.Decrypt(
 			Arg.Is(responseContent),
 			Arg.Is(secretKey))
-			.Returns(Decrypt);
+			.Returns(decrypt);
 
 		var fakerLogger = NullLogger<GameApiClient>.Instance;
 		var apiClient = new GameApiClient(
@@ -160,7 +160,7 @@ public class GameApiClient_PlayerCreateUnitTest
 			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
 		var httpClient = handler.ToHttpClient();
 
-		var Decrypt = JsonNode.Parse("""
+		var decrypt = JsonNode.Parse("""
 			{
 				"Error": "can not CreateMember: \\u8F38\\u5165\\u7684\\u5E33\\u865F\\u5DF2\\u7D93\\u6709\\u4EBA\\u4F7F\\u7528",
 				"responeid": "20837684617",
@@ -171,7 +171,7 @@ public class GameApiClient_PlayerCreateUnitTest
 		_ = fakeCryptographyUtensil.Decrypt(
 			Arg.Is(responseContent),
 			Arg.Is(secretKey))
-			.Returns(Decrypt);
+			.Returns(decrypt);
 
 		var fakerLogger = NullLogger<GameApiClient>.Instance;
 		var apiClient = new GameApiClient(

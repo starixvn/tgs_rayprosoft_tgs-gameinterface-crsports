@@ -70,7 +70,7 @@ public class GameApiClient_ALLWagerUnitTest
 			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
 		var httpClient = handler.ToHttpClient();
 
-		var Decrypt = JsonNode.Parse("""
+		var decrypt = JsonNode.Parse("""
 			{
 				"agname": "RT706test1",
 				"wager_cashout": [],
@@ -129,7 +129,7 @@ public class GameApiClient_ALLWagerUnitTest
 		_ = fakeCryptographyUtensil.Decrypt(
 			Arg.Is(responseContent),
 			Arg.Is(secretKey))
-			.Returns(Decrypt);
+			.Returns(decrypt);
 
 		var fakerLogger = NullLogger<GameApiClient>.Instance;
 		var apiClient = new GameApiClient(
@@ -230,7 +230,7 @@ public class GameApiClient_ALLWagerUnitTest
 			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
 		var httpClient = handler.ToHttpClient();
 
-		var Decrypt = JsonNode.Parse("""
+		var decrypt = JsonNode.Parse("""
 			{
 				"agname": "RT706test1",
 				"wager_cashout": [],
@@ -292,7 +292,7 @@ public class GameApiClient_ALLWagerUnitTest
 		_ = fakeCryptographyUtensil.Decrypt(
 			Arg.Is(responseContent),
 			Arg.Is(secretKey))
-			.Returns(Decrypt);
+			.Returns(decrypt);
 
 		var fakerLogger = NullLogger<GameApiClient>.Instance;
 		var apiClient = new GameApiClient(
@@ -393,7 +393,7 @@ public class GameApiClient_ALLWagerUnitTest
 			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
 		var httpClient = handler.ToHttpClient();
 
-		var Decrypt = JsonNode.Parse("""
+		var decrypt = JsonNode.Parse("""
 			{
 				"Error": "can not ALLWager: no data for search",
 				"responeid": "20837820712",
@@ -404,7 +404,7 @@ public class GameApiClient_ALLWagerUnitTest
 		_ = fakeCryptographyUtensil.Decrypt(
 			Arg.Is(responseContent),
 			Arg.Is(secretKey))
-			.Returns(Decrypt);
+			.Returns(decrypt);
 
 		var fakerLogger = NullLogger<GameApiClient>.Instance;
 		var apiClient = new GameApiClient(
