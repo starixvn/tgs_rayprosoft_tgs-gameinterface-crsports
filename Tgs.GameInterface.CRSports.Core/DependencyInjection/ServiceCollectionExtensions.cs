@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Security;
 using System.Reflection;
 using System.Security.Authentication;
 using StackExchange.Redis;
@@ -18,8 +19,16 @@ public static class ServiceCollectionExtensions
 		.AddHttpClient<IGameApiClient, GameApiClient>()
 		.ConfigurePrimaryHttpMessageHandler(x => new HttpClientHandler()
 		{
-			SslProtocols = SslProtocols.Tls13 | SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls
+			SslProtocols = SslProtocols.Tls13 | SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls,
 		})
+		.UseSocketsHttpHandler(x => new CipherSuitesPolicy(
+		[
+			TlsCipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
+			TlsCipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
+			TlsCipherSuite.TLS_RSA_WITH_3DES_EDE_CBC_SHA,
+			TlsCipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256 ,
+			TlsCipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256  ,
+		]))
 		.Services
 		.AddSingleton(TimeProvider.System)
 		.AddSingleton<DateTimeConverter>()
