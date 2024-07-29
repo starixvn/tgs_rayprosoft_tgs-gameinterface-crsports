@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System.Net;
+using System.Reflection;
+using System.Security.Authentication;
 using StackExchange.Redis;
 using Tgs.GameInterface.CRSports.Core;
 
@@ -14,6 +16,10 @@ public static class ServiceCollectionExtensions
 			Assembly.GetExecutingAssembly(),
 			ServiceLifetime.Transient)
 		.AddHttpClient<IGameApiClient, GameApiClient>()
+		.ConfigurePrimaryHttpMessageHandler(x => new HttpClientHandler()
+		{
+			SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls | SslProtocols.Ssl3
+		})
 		.Services
 		.AddSingleton(TimeProvider.System)
 		.AddSingleton<DateTimeConverter>()

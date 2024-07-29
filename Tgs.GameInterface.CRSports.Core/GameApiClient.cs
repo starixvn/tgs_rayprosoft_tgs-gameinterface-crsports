@@ -9,8 +9,6 @@ using Polly;
 using Tgs.GameInterface.CRSports.Core.Exceptions;
 using Tgs.GameInterface.CRSports.Core.Extensions;
 using Tgs.GameInterface.CRSports.Core.Models;
-using Tgs.GameInterface.CRSports.Core;
-using System.Net;
 
 namespace Tgs.GameInterface.CRSports.Core;
 
@@ -435,8 +433,6 @@ internal class GameApiClient(
 			});
 
 		var sw = Stopwatch.StartNew();
-
-		System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
 		var httpResponseMessage = await httpClient.PostAsync(
 			requestUri: apiUrl,
