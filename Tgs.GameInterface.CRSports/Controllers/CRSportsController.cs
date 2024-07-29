@@ -13,6 +13,19 @@ namespace Tgs.GameInterface.CRSports.Controllers;
 public class CRSportsController : ControllerBase
 {
 	/// <summary>
+	/// Ags the login v2 asynchronous.
+	/// </summary>
+	/// <param name="service">The service.</param>
+	/// <param name="source">The source.</param>
+	/// <returns></returns>
+	[HttpPost("aglogin/v2", Name = "AGLoginV2")]
+	public ValueTask<string> AGLoginV2Async(
+		[FromServices] IGetService<AGLoginQuery, string> service,
+		[FromBody] AGLoginQuery source)
+		=> service.GetAsync(
+			query: source,
+			cancellationToken: HttpContext.RequestAborted);
+	/// <summary>
 	/// Ags the login asynchronous.
 	/// </summary>
 	/// <param name="messageSender">The message sender.</param>
