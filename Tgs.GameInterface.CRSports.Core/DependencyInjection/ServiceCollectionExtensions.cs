@@ -18,7 +18,7 @@ public static class ServiceCollectionExtensions
 		.AddHttpClient<IGameApiClient, GameApiClient>()
 		.ConfigurePrimaryHttpMessageHandler(x => new HttpClientHandler()
 		{
-			SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls
+			SslProtocols = SslProtocols.Tls13 | SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls
 		})
 		.Services
 		.AddSingleton(TimeProvider.System)
