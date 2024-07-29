@@ -36,7 +36,7 @@ internal class GameApiClient(
 
 		apiUrl = new Uri(apiUrl, "/app/control_API/agents/api_doaction.php");
 
-		var jsonNode = await PosetAsync(
+		var jsonNode = await PostAsync(
 			apiUrl: apiUrl,
 			agentId: agentId,
 			secretKey: secretKey,
@@ -405,7 +405,7 @@ internal class GameApiClient(
 						parameters["token"] = token;
 					});
 
-		return await retryPolicy.ExecuteAsync(() => PosetAsync(
+		return await retryPolicy.ExecuteAsync(() => PostAsync(
 			apiUrl: new Uri(apiUrl, "/app/control_API/agents/api_doaction.php"),
 			agentId: agentId,
 			secretKey: secretKey,
@@ -416,7 +416,7 @@ internal class GameApiClient(
 			.ConfigureAwait(false);
 	}
 
-	private async ValueTask<JsonNode> PosetAsync(Uri apiUrl, int agentId, string secretKey, string method, JsonNode parameters, string logPrefix, CancellationToken cancellationToken = default)
+	private async ValueTask<JsonNode> PostAsync(Uri apiUrl, int agentId, string secretKey, string method, JsonNode parameters, string logPrefix, CancellationToken cancellationToken = default)
 	{
 		parameters["timestamp"] = timeProvider.GetUtcNow().ToUnixTimeMilliseconds().ToString();
 		var request = cryptographyUtensil.Encrypt(parameters, secretKey);
