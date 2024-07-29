@@ -6,7 +6,7 @@ internal class PlayerLogoutCommandService(IGameApiClient apiClient) : ICommandSe
 {
 	public ValueTask ExecuteAsync(PlayerLogoutCommand command, CancellationToken cancellationToken = default)
 		=> apiClient.KickOutMemAsync(
-			apiBaseUrl: command.ApiUrl,
+			apiUrl: command.ApiUrl,
 			agentId: command.AgentId,
 			secretKey: command.SecretKey,
 			agentAccount: command.AgentAccount,

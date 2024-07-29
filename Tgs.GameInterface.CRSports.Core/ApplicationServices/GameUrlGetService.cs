@@ -8,7 +8,7 @@ internal class GameUrlGetService(
 	public async ValueTask<GameUrlResult> GetAsync(GameUrlQuery query, CancellationToken cancellationToken = default)
 	{
 		var resp = await client.LaunchGameAsync(
-			apiBaseUrl: query.ApiUrl,
+			apiUrl: query.ApiUrl,
 			agentId: query.AgentId,
 			secretKey: query.SecretKey,
 			agentAccount: query.AgentAccount,

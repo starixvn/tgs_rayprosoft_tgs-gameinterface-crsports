@@ -2,7 +2,6 @@
 public record WagerDataResp(
 	string Id,
 	string Username,
-	string Mid,
 	string Gtype,
 	DateTimeOffset Adddate,
 	DateTimeOffset Resultdate,

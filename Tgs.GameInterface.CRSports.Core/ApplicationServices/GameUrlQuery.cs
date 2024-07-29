@@ -53,6 +53,7 @@ public record GameUrlQuery
 	/// <summary>
 	/// The is mobile
 	/// </summary>
+	[DefaultValue(typeof(bool), "false")]
 	public bool IsMobile { get; set; }
 
 	/// <summary>

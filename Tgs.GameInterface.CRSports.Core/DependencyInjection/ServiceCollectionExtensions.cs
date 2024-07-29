@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using StackExchange.Redis;
 using Tgs.GameInterface.CRSports.Core;
-using Tgs.GameInterface.GlobalTechnology.Core;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

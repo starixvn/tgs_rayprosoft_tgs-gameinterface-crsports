@@ -6,7 +6,7 @@ internal class FundStatusGetService(IGameApiClient apiClient) : IGetService<Fund
 {
 	public ValueTask<bool> GetAsync(FundStatusQuery query, CancellationToken cancellationToken = default)
 		=> apiClient.ChkTransInfoAsync(
-			apiBaseUrl: query.ApiUrl,
+			apiUrl: query.ApiUrl,
 			agentId: query.AgentId,
 			secretKey: query.SecretKey,
 			agentAccount: query.AgentAccount,

@@ -1,5 +1,5 @@
 ﻿using StackExchange.Redis;
-using Tgs.GameInterface.GlobalTechnology.Protos;
+using Tgs.GameInterface.CRSports.Protos;
 using Valhalla.MessageQueue;
 
 namespace Tgs.GameInterface.CRSports.Core;
@@ -10,13 +10,13 @@ internal class TokenUtensil(
 {
 	private readonly SemaphoreSlim _semaphore = new(1, 1);
 
-	public async ValueTask DeleteTokenAsync(Uri apiBaseUrl, int agentId, CancellationToken cancellationToken = default)
+	public async ValueTask DeleteTokenAsync(Uri apiUrl, int agentId, CancellationToken cancellationToken = default)
 	{
 		var key = string.Concat(typeof(TokenUtensil).Namespace!.Replace(".", "-").ToLower(), ":", agentId);
 		await database.KeyDeleteAsync(key, CommandFlags.FireAndForget).ConfigureAwait(false);
 	}
 
-	public async ValueTask<string> GetTokenAsync(Uri apiBaseUrl, int agentId, string secretKey, string agentAccount, string agentPassword, CancellationToken cancellationToken = default)
+	public async ValueTask<string> GetTokenAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, CancellationToken cancellationToken = default)
 	{
 		var key = string.Concat(typeof(TokenUtensil).Namespace!.Replace(".", "-").ToLower(), ":", agentId);
 		if (!await database.KeyExistsAsync(key).ConfigureAwait(false))
@@ -30,7 +30,7 @@ internal class TokenUtensil(
 						"gp.gameinterface.cr.aglogin",
 						new AGLoginRequest
 						{
-							ApiUrl = apiBaseUrl.ToString(),
+							ApiUrl = apiUrl.ToString(),
 							AgentId = agentId,
 							SecretKey = secretKey,
 							AgentAccount = agentAccount,

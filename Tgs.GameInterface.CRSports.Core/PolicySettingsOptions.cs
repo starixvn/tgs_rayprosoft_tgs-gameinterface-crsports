@@ -10,9 +10,9 @@ public record PolicySettingsOptions
 	/// <summary>
 	/// The global retry count
 	/// </summary>
-	public int GlobalRetryCount { get; init; }
+	public int GlobalRetryCount { get; set; }
 	/// <summary>
 	/// The global retry wait sec
 	/// </summary>
-	public int GlobalRetryWaitSec { get; init; }
+	public int GlobalRetryWaitSec { get; set; }
 }

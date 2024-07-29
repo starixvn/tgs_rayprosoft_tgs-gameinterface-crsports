@@ -10,19 +10,22 @@ namespace Tgs.GameInterface.CRSports.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class InfoController(
-	IConfiguration configuration) : ControllerBase
+public class InfoController() : ControllerBase
 {
 	/// <summary>
 	/// Gets the asynchronous.
 	/// </summary>
-	/// <param name="_hostingEnvironment">The hosting environment.</param>
-	/// <param name="gameInterfaceOptions">The game interface options.</param>
+	/// <param name="configuration">The configuration.</param>
+	/// <param name="webHostEnvironment">The web host environment.</param>
+	/// <param name="gameInterfaceSettingsOptions">The game interface settings options.</param>
+	/// <param name="policySettingsOptions">The policy settings options.</param>
 	/// <returns></returns>
 	[HttpGet]
 	public async Task<object> GetAsync(
-		[FromServices] IWebHostEnvironment _hostingEnvironment,
-		[FromServices] IOptions<GameInterfaceOptions> gameInterfaceOptions)
+		[FromServices] IConfiguration configuration,
+		[FromServices] IWebHostEnvironment webHostEnvironment,
+		[FromServices] IOptions<GameInterfaceSettingsOptions> gameInterfaceSettingsOptions,
+		[FromServices] IOptions<PolicySettingsOptions> policySettingsOptions)
 	{
 		var hostName = Dns.GetHostName();
 		var hostEntry = await Dns.GetHostEntryAsync(hostName).ConfigureAwait(false);
@@ -35,13 +38,14 @@ public class InfoController(
 				Environment.MachineName,
 				HostName = hostName,
 				HostIp = hostIp?.ToString() ?? string.Empty,
-				Environment = _hostingEnvironment.EnvironmentName,
+				Environment = webHostEnvironment.EnvironmentName,
 				OsVersion = $"{Environment.OSVersion}",
 				Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(),
 				ProcessCount = Environment.ProcessorCount,
 				ReleaseNamespace = configuration.GetValue<string>("RELEASE_NAMESPACE"),
 				PodIPAddress = configuration.GetValue<string>("POD_IP"),
-				GameInterfaceOptions = gameInterfaceOptions.Value
+				GameInterfaceSettingsOptions = gameInterfaceSettingsOptions.Value,
+				PolicySettingsOptions = policySettingsOptions.Value
 			}
 		};
 	}

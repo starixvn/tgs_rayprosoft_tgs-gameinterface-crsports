@@ -1,4 +1,4 @@
-﻿namespace Tgs.GameInterface.GlobalTechnology.Core;
+﻿namespace Tgs.GameInterface.CRSports.Core;
 
 internal class DateTimeConverter
 {

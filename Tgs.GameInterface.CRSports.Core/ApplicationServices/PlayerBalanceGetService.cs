@@ -8,7 +8,7 @@ internal class PlayerBalanceGetService(
 	public async ValueTask<PlayerBalanceResult> GetAsync(PlayerBalanceQuery query, CancellationToken cancellationToken = default)
 	{
 		var resp = await client.ChkMemberBalanceAsync(
-			apiBaseUrl: query.ApiUrl,
+			apiUrl: query.ApiUrl,
 			agentId: query.AgentId,
 			secretKey: query.SecretKey,
 			agentAccount: query.AgentAccount,

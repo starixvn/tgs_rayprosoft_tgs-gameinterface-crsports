@@ -7,7 +7,7 @@ internal class FundOutGetService(IGameApiClient apiClient) : IGetService<FundOut
 	public async ValueTask<FundResult> GetAsync(FundOutQuery query, CancellationToken cancellationToken = default)
 	{
 		var resp = await apiClient.DepositAsync(
-			apiBaseUrl: query.ApiUrl,
+			apiUrl: query.ApiUrl,
 			agentId: query.AgentId,
 			secretKey: query.SecretKey,
 			agentAccount: query.AgentAccount,

@@ -7,6 +7,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Tgs.GameInterface.CRSports;
 using Tgs.GameInterface.CRSports.Core;
+using Tgs.GameInterface.CRSports.GrpcServices;
 using Tgs.GameInterface.CRSports.Messages;
 using Tgs.MessageQueue.Nats.Serializers;
 
@@ -62,10 +63,25 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services
 	.AddOptions<RedisOptions>()
-	.Configure((options) => options.ConnectionString = builder.Configuration.GetConnectionString("Redis")!)
+	.Configure((RedisOptions options, IServiceProvider sp) =>
+	{
+		var configuration = sp.GetRequiredService<IConfiguration>();
+		options.ConnectionString = configuration.GetConnectionString("Redis")!;
+	})
 	.Services
-	.AddOptions<GameInterfaceOptions>()
-	.Configure((options) => builder.Configuration.GetRequiredSection("GameInterfaceSettings")!.Bind(options))
+	.AddOptions<GameInterfaceSettingsOptions>()
+	.Configure((GameInterfaceSettingsOptions options, IServiceProvider sp) =>
+	{
+		var configuration = sp.GetRequiredService<IConfiguration>();
+		configuration.GetRequiredSection("GameInterfaceSettings")!.Bind(options);
+	})
+	.Services
+	.AddOptions<PolicySettingsOptions>()
+	.Configure((PolicySettingsOptions options, IServiceProvider sp) =>
+	{
+		var configuration = sp.GetRequiredService<IConfiguration>();
+		configuration.GetRequiredSection("PolicySettings")!.Bind(options);
+	})
 	.Services
 	.AddSingleton<RedisConnectionManager>()
 	.AddGameInterfaceCore(
@@ -132,7 +148,7 @@ _ = app.MapControllers();
 app.MapHealthChecks("/healthz");
 
 // Configure the HTTP request pipeline.
-//app.MapGrpcService<GameInterfaceGlobalTechnologyGrpcService>();
+app.MapGrpcService<GameInterfaceCRSportsGrpcService>();
 app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
 app.Run();

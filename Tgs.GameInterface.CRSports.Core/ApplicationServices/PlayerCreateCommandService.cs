@@ -6,7 +6,7 @@ internal class PlayerCreateCommandService(IGameApiClient apiClient) : ICommandSe
 {
 	public ValueTask ExecuteAsync(PlayerCreateCommand command, CancellationToken cancellationToken = default)
 		=> apiClient.CreateMemberAsync(
-			apiBaseUrl: command.ApiUrl,
+			apiUrl: command.ApiUrl,
 			agentId: command.AgentId,
 			secretKey: command.SecretKey,
 			agentAccount: command.AgentAccount,

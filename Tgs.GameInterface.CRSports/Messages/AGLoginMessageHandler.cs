@@ -1,5 +1,5 @@
 ﻿using Tgs.GameInterface.CRSports.Core.ApplicationServices;
-using Tgs.GameInterface.GlobalTechnology.Protos;
+using Tgs.GameInterface.CRSports.Protos;
 using Tgs.ServiceUtility;
 using Valhalla.MessageQueue;
 

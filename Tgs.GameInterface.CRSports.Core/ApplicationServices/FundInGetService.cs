@@ -7,7 +7,7 @@ internal class FundInGetService(IGameApiClient apiClient) : IGetService<FundInQu
 	public async ValueTask<FundResult> GetAsync(FundInQuery query, CancellationToken cancellationToken = default)
 	{
 		var resp = await apiClient.WithdrawAsync(
-			apiBaseUrl: query.ApiUrl,
+			apiUrl: query.ApiUrl,
 			agentId: query.AgentId,
 			secretKey: query.SecretKey,
 			agentAccount: query.AgentAccount,

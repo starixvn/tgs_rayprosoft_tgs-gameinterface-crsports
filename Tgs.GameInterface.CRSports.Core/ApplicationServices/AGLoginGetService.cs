@@ -7,7 +7,7 @@ internal class AGLoginGetService(
 {
 	public ValueTask<string> GetAsync(AGLoginQuery query, CancellationToken cancellationToken = default)
 		=> client.AGLoginAsync(
-			apiBaseUrl: query.ApiUrl,
+			apiUrl: query.ApiUrl,
 			agentId: query.AgentId,
 			secretKey: query.SecretKey,
 			agentAccount: query.AgentAccount,

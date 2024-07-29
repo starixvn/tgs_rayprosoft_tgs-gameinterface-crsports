@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using RichardSzalay.MockHttp;
 using Microsoft.Extensions.Options;
-using Tgs.GameInterface.GlobalTechnology.Core;
+using Tgs.GameInterface.CRSports.Core;
 
 namespace Tgs.GameInterface.CRSports.Core.UnitTest;
 
@@ -18,7 +18,7 @@ public class GameApiClient_PlayerCreateUnitTest
 			GlobalRetryCount = 1,
 			GlobalRetryWaitSec = 1,
 		});
-		var fakeGameInterfaceOptions = Options.Create(new GameInterfaceOptions
+		var fakeGameInterfaceOptions = Options.Create(new GameInterfaceSettingsOptions
 		{
 			PlayerPassword = "TgsPassw0rd"
 		});
@@ -27,7 +27,7 @@ public class GameApiClient_PlayerCreateUnitTest
 		var fakeTokenUtensil = Substitute.For<ITokenUtensil>();
 		var fakeCryptographyUtensil = Substitute.For<ICryptographyUtensil>();
 
-		var apiBaseUrl = new Uri("https://api.orb-6789.com/");
+		var apiUrl = new Uri("https://api.orb-6789.com/");
 		var agentId = 3238;
 		var secretKey = "FnzrUTi5fcsdrws7";
 		var agentAccount = "RT706test1";
@@ -40,7 +40,7 @@ public class GameApiClient_PlayerCreateUnitTest
 
 		var token = Guid.NewGuid().ToString("N");
 		_ = fakeTokenUtensil.GetTokenAsync(
-			apiBaseUrl: Arg.Is(apiBaseUrl),
+			apiUrl: Arg.Is(apiUrl),
 			agentId: Arg.Is(agentId),
 			secretKey: Arg.Is(secretKey),
 			agentAccount: Arg.Is(agentAccount),
@@ -59,7 +59,7 @@ public class GameApiClient_PlayerCreateUnitTest
 			.Returns(encrypt);
 		var responseContent = Guid.NewGuid().ToString("N");
 		var handler = new MockHttpMessageHandler();
-		handler.Expect(HttpMethod.Post, new Uri(apiBaseUrl, "/app/control_API/agents/api_doaction.php").ToString())
+		handler.Expect(HttpMethod.Post, new Uri(apiUrl, "/app/control_API/agents/api_doaction.php").ToString())
 			.WithJsonContent<JsonObject>(content =>
 				content["Request"]!.GetValue<string>() == encrypt &&
 				content["Method"]!.GetValue<string>() == "CreateMember" &&
@@ -92,7 +92,7 @@ public class GameApiClient_PlayerCreateUnitTest
 			httpClient);
 
 		await apiClient.CreateMemberAsync(
-			 apiBaseUrl: apiBaseUrl,
+			 apiUrl: apiUrl,
 			 agentId: agentId,
 			 secretKey: secretKey,
 			 agentAccount: agentAccount,
@@ -111,7 +111,7 @@ public class GameApiClient_PlayerCreateUnitTest
 			GlobalRetryCount = 1,
 			GlobalRetryWaitSec = 1,
 		});
-		var fakeGameInterfaceOptions = Options.Create(new GameInterfaceOptions
+		var fakeGameInterfaceOptions = Options.Create(new GameInterfaceSettingsOptions
 		{
 			PlayerPassword = "TgsPassw0rd"
 		});
@@ -120,7 +120,7 @@ public class GameApiClient_PlayerCreateUnitTest
 		var fakeTokenUtensil = Substitute.For<ITokenUtensil>();
 		var fakeCryptographyUtensil = Substitute.For<ICryptographyUtensil>();
 
-		var apiBaseUrl = new Uri("https://api.orb-6789.com/");
+		var apiUrl = new Uri("https://api.orb-6789.com/");
 		var agentId = 3238;
 		var secretKey = "FnzrUTi5fcsdrws7";
 		var agentAccount = "RT706test1";
@@ -133,7 +133,7 @@ public class GameApiClient_PlayerCreateUnitTest
 
 		var token = Guid.NewGuid().ToString("N");
 		_ = fakeTokenUtensil.GetTokenAsync(
-			apiBaseUrl: Arg.Is(apiBaseUrl),
+			apiUrl: Arg.Is(apiUrl),
 			agentId: Arg.Is(agentId),
 			secretKey: Arg.Is(secretKey),
 			agentAccount: Arg.Is(agentAccount),
@@ -152,7 +152,7 @@ public class GameApiClient_PlayerCreateUnitTest
 			.Returns(encrypt);
 		var responseContent = Guid.NewGuid().ToString("N");
 		var handler = new MockHttpMessageHandler();
-		handler.Expect(HttpMethod.Post, new Uri(apiBaseUrl, "/app/control_API/agents/api_doaction.php").ToString())
+		handler.Expect(HttpMethod.Post, new Uri(apiUrl, "/app/control_API/agents/api_doaction.php").ToString())
 			.WithJsonContent<JsonObject>(content =>
 				content["Request"]!.GetValue<string>() == encrypt &&
 				content["Method"]!.GetValue<string>() == "CreateMember" &&
@@ -185,7 +185,7 @@ public class GameApiClient_PlayerCreateUnitTest
 			httpClient);
 
 		await apiClient.CreateMemberAsync(
-			 apiBaseUrl: apiBaseUrl,
+			 apiUrl: apiUrl,
 			 agentId: agentId,
 			 secretKey: secretKey,
 			 agentAccount: agentAccount,

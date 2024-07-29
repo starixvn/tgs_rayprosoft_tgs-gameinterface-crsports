@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using RichardSzalay.MockHttp;
-using Tgs.GameInterface.GlobalTechnology.Core;
 
 namespace Tgs.GameInterface.CRSports.Core.UnitTest;
 
@@ -18,7 +17,7 @@ public class GameApiClient_WithdrawUnitTest
 			GlobalRetryCount = 1,
 			GlobalRetryWaitSec = 1,
 		});
-		var fakeGameInterfaceOptions = Options.Create(new GameInterfaceOptions
+		var fakeGameInterfaceOptions = Options.Create(new GameInterfaceSettingsOptions
 		{
 			PlayerPassword = "TgsPassw0rd"
 		});
@@ -27,7 +26,7 @@ public class GameApiClient_WithdrawUnitTest
 		var fakeTokenUtensil = Substitute.For<ITokenUtensil>();
 		var fakeCryptographyUtensil = Substitute.For<ICryptographyUtensil>();
 
-		var apiBaseUrl = new Uri("https://api.orb-6789.com/");
+		var apiUrl = new Uri("https://api.orb-6789.com/");
 		var agentId = 3238;
 		var secretKey = "FnzrUTi5fcsdrws7";
 		var agentAccount = "RT706test1";
@@ -41,7 +40,7 @@ public class GameApiClient_WithdrawUnitTest
 
 		var token = Guid.NewGuid().ToString("N");
 		_ = fakeTokenUtensil.GetTokenAsync(
-			apiBaseUrl: Arg.Is(apiBaseUrl),
+			apiUrl: Arg.Is(apiUrl),
 			agentId: Arg.Is(agentId),
 			secretKey: Arg.Is(secretKey),
 			agentAccount: Arg.Is(agentAccount),
@@ -60,7 +59,7 @@ public class GameApiClient_WithdrawUnitTest
 			.Returns(encrypt);
 		var responseContent = Guid.NewGuid().ToString("N");
 		var handler = new MockHttpMessageHandler();
-		handler.Expect(HttpMethod.Post, new Uri(apiBaseUrl, "/app/control_API/agents/api_doaction.php").ToString())
+		handler.Expect(HttpMethod.Post, new Uri(apiUrl, "/app/control_API/agents/api_doaction.php").ToString())
 			.WithJsonContent<JsonObject>(content =>
 				content["Request"]!.GetValue<string>() == encrypt &&
 				content["Method"]!.GetValue<string>() == "Withdraw" &&
@@ -103,7 +102,7 @@ public class GameApiClient_WithdrawUnitTest
 			httpClient);
 
 		var actual = await apiClient.WithdrawAsync(
-			apiBaseUrl: apiBaseUrl,
+			apiUrl: apiUrl,
 			agentId: agentId,
 			secretKey: secretKey,
 			agentAccount: agentAccount,

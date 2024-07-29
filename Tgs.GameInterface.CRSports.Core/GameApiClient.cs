@@ -9,24 +9,24 @@ using Polly;
 using Tgs.GameInterface.CRSports.Core.Exceptions;
 using Tgs.GameInterface.CRSports.Core.Extensions;
 using Tgs.GameInterface.CRSports.Core.Models;
-using Tgs.GameInterface.GlobalTechnology.Core;
+using Tgs.GameInterface.CRSports.Core;
 
 namespace Tgs.GameInterface.CRSports.Core;
 
 internal class GameApiClient(
 	ILogger<GameApiClient> logger,
 	IOptions<PolicySettingsOptions> policySettingsOptions,
-	IOptions<GameInterfaceOptions> gameInterfaceOptions,
+	IOptions<GameInterfaceSettingsOptions> gameInterfaceOptions,
 	TimeProvider timeProvider,
 	DateTimeConverter dateTimeConverter,
 	ITokenUtensil tokenUtensil,
 	ICryptographyUtensil cryptographyUtensil,
 	HttpClient httpClient) : IGameApiClient
 {
-	private readonly GameInterfaceOptions _gameInterfaceOptions = gameInterfaceOptions.Value;
+	private readonly GameInterfaceSettingsOptions _gameInterfaceOptions = gameInterfaceOptions.Value;
 	private readonly PolicySettingsOptions _policySettingsOptions = policySettingsOptions.Value;
 
-	public async ValueTask<string> AGLoginAsync(Uri apiBaseUrl, int agentId, string secretKey, string agentAccount, string agentPassword, CancellationToken cancellationToken)
+	public async ValueTask<string> AGLoginAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, CancellationToken cancellationToken)
 	{
 		var parameters = new JsonObject
 		{
@@ -34,10 +34,10 @@ internal class GameApiClient(
 			["password"] = agentPassword
 		};
 
-		apiBaseUrl = new Uri(apiBaseUrl, "/app/control_API/agents/api_doaction.php");
+		apiUrl = new Uri(apiUrl, "/app/control_API/agents/api_doaction.php");
 
 		var jsonNode = await PosetAsync(
-			apiBaseUrl: apiBaseUrl,
+			apiUrl: apiUrl,
 			agentId: agentId,
 			secretKey: secretKey,
 			method: "AGLogin",
@@ -49,7 +49,7 @@ internal class GameApiClient(
 		return !string.Equals(jsonNode["respcode"]!.ToString(), "0000") ? throw new GameInterfaceException(jsonNode["respcode"]!.ToString()) : jsonNode["token"]!.GetValue<string>();
 	}
 
-	public async IAsyncEnumerable<WagerDataResp> ALLWagerAsync(Uri apiBaseUrl, int agentId, string secretKey, string agentAccount, string agentPassword, DateTimeOffset dateStart, DateTimeOffset dateEnd, int settle, int page, [EnumeratorCancellation] CancellationToken cancellationToken)
+	public async IAsyncEnumerable<WagerDataResp> ALLWagerAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, DateTimeOffset dateStart, DateTimeOffset dateEnd, int settle, int page, [EnumeratorCancellation] CancellationToken cancellationToken)
 	{
 		var parameters = new JsonObject
 		{
@@ -61,7 +61,7 @@ internal class GameApiClient(
 		};
 
 		var jsonNode = await TokenAsync(
-			apiBaseUrl: apiBaseUrl,
+			apiUrl: apiUrl,
 			agentId: agentId,
 			secretKey: secretKey,
 			agentAccount: agentAccount,
@@ -92,7 +92,6 @@ internal class GameApiClient(
 				yield return new WagerDataResp(
 					 Id: wagerdata["id"]!.GetValue<string>(),
 					 Username: wagerdata["username"]!.GetValue<string>(),
-					 Mid: wagerdata["mid"]!.GetValue<string>(),
 					 Gtype: wagerdata["gtype"]!.GetValue<string>(),
 					 Adddate: dateTimeConverter.StringConvertToDatetime(wagerdata["adddate"]!.GetValue<string>()),
 					 Resultdate: !string.IsNullOrEmpty(resultdate) ? dateTimeConverter.StringConvertToDatetime(resultdate) : DateTimeOffset.UnixEpoch,
@@ -107,7 +106,7 @@ internal class GameApiClient(
 		}
 	}
 
-	public async ValueTask<ChkMemberBalanceResp> ChkMemberBalanceAsync(Uri apiBaseUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string memname, CancellationToken cancellationToken)
+	public async ValueTask<ChkMemberBalanceResp> ChkMemberBalanceAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string memname, CancellationToken cancellationToken)
 	{
 		var parameters = new JsonObject
 		{
@@ -115,7 +114,7 @@ internal class GameApiClient(
 		};
 
 		var jsonNode = await TokenAsync(
-			apiBaseUrl: apiBaseUrl,
+			apiUrl: apiUrl,
 			agentId: agentId,
 			secretKey: secretKey,
 			agentAccount: agentAccount,
@@ -137,7 +136,7 @@ internal class GameApiClient(
 				Balance: decimal.Parse(jsonNode["balance"]!.GetValue<string>()));
 	}
 
-	public async ValueTask<bool> ChkTransInfoAsync(Uri apiBaseUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string memname, string payno, CancellationToken cancellationToken)
+	public async ValueTask<bool> ChkTransInfoAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string memname, string payno, CancellationToken cancellationToken)
 	{
 		var parameters = new JsonObject
 		{
@@ -147,7 +146,7 @@ internal class GameApiClient(
 		};
 
 		var jsonNode = await TokenAsync(
-			apiBaseUrl: apiBaseUrl,
+			apiUrl: apiUrl,
 			agentId: agentId,
 			secretKey: secretKey,
 			agentAccount: agentAccount,
@@ -164,7 +163,7 @@ internal class GameApiClient(
 				: false);
 	}
 
-	public async ValueTask CreateMemberAsync(Uri apiBaseUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string memname, string currency, CancellationToken cancellationToken)
+	public async ValueTask CreateMemberAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string memname, string currency, CancellationToken cancellationToken)
 	{
 		var parameters = new JsonObject
 		{
@@ -174,7 +173,7 @@ internal class GameApiClient(
 		};
 
 		var jsonNode = await TokenAsync(
-			apiBaseUrl: apiBaseUrl,
+			apiUrl: apiUrl,
 			agentId: agentId,
 			secretKey: secretKey,
 			agentAccount: agentAccount,
@@ -194,7 +193,7 @@ internal class GameApiClient(
 		}
 	}
 
-	public async ValueTask<MoneyDataResp> DepositAsync(Uri apiBaseUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string memname, string payno, decimal amount, CancellationToken cancellationToken)
+	public async ValueTask<MoneyDataResp> DepositAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string memname, string payno, decimal amount, CancellationToken cancellationToken)
 	{
 		var parameters = new JsonObject
 		{
@@ -204,7 +203,7 @@ internal class GameApiClient(
 		};
 
 		var jsonNode = await TokenAsync(
-			apiBaseUrl: apiBaseUrl,
+			apiUrl: apiUrl,
 			agentId: agentId,
 			secretKey: secretKey,
 			agentAccount: agentAccount,
@@ -224,12 +223,12 @@ internal class GameApiClient(
 				 Resp: jsonNode["moneydata"]!.ToJsonString());
 	}
 
-	public async IAsyncEnumerable<MemOnlineResp> GetMemOnlineListAsync(Uri apiBaseUrl, int agentId, string secretKey, string agentAccount, string agentPassword, [EnumeratorCancellation] CancellationToken cancellationToken)
+	public async IAsyncEnumerable<MemOnlineResp> GetMemOnlineListAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, [EnumeratorCancellation] CancellationToken cancellationToken)
 	{
 		var parameters = new JsonObject { };
 
 		var jsonNode = await TokenAsync(
-			apiBaseUrl: apiBaseUrl,
+			apiUrl: apiUrl,
 			agentId: agentId,
 			secretKey: secretKey,
 			agentAccount: agentAccount,
@@ -255,12 +254,12 @@ internal class GameApiClient(
 		}
 	}
 
-	public async ValueTask KickOutAllMemAsync(Uri apiBaseUrl, int agentId, string secretKey, string agentAccount, string agentPassword, CancellationToken cancellationToken)
+	public async ValueTask KickOutAllMemAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, CancellationToken cancellationToken)
 	{
 		var parameters = new JsonObject { };
 
 		var jsonNode = await TokenAsync(
-			apiBaseUrl: apiBaseUrl,
+			apiUrl: apiUrl,
 			agentId: agentId,
 			secretKey: secretKey,
 			agentAccount: agentAccount,
@@ -277,7 +276,7 @@ internal class GameApiClient(
 		}
 	}
 
-	public async ValueTask KickOutMemAsync(Uri apiBaseUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string memname, CancellationToken cancellationToken)
+	public async ValueTask KickOutMemAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string memname, CancellationToken cancellationToken)
 	{
 		var parameters = new JsonObject
 		{
@@ -285,7 +284,7 @@ internal class GameApiClient(
 		};
 
 		var jsonNode = await TokenAsync(
-			apiBaseUrl: apiBaseUrl,
+			apiUrl: apiUrl,
 			agentId: agentId,
 			secretKey: secretKey,
 			agentAccount: agentAccount,
@@ -302,7 +301,7 @@ internal class GameApiClient(
 		}
 	}
 
-	public async ValueTask<LaunchGameResp> LaunchGameAsync(Uri apiBaseUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string memname, string currency, string machine, string langx, string remoteip, CancellationToken cancellationToken)
+	public async ValueTask<LaunchGameResp> LaunchGameAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string memname, string currency, string machine, string langx, string remoteip, CancellationToken cancellationToken)
 	{
 		var parameters = new JsonObject
 		{
@@ -315,7 +314,7 @@ internal class GameApiClient(
 		};
 
 		var jsonNode = await TokenAsync(
-			apiBaseUrl: apiBaseUrl,
+			apiUrl: apiUrl,
 			agentId: agentId,
 			secretKey: secretKey,
 			agentAccount: agentAccount,
@@ -337,7 +336,7 @@ internal class GameApiClient(
 				GameUrl: jsonNode["launchgameurl"]!.GetValue<string>());
 	}
 
-	public async ValueTask<MoneyDataResp> WithdrawAsync(Uri apiBaseUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string memname, string payno, decimal amount, CancellationToken cancellationToken)
+	public async ValueTask<MoneyDataResp> WithdrawAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string memname, string payno, decimal amount, CancellationToken cancellationToken)
 	{
 		var parameters = new JsonObject
 		{
@@ -347,7 +346,7 @@ internal class GameApiClient(
 		};
 
 		var jsonNode = await TokenAsync(
-			apiBaseUrl: apiBaseUrl,
+			apiUrl: apiUrl,
 			agentId: agentId,
 			secretKey: secretKey,
 			agentAccount: agentAccount,
@@ -367,10 +366,10 @@ internal class GameApiClient(
 				 Resp: jsonNode["moneydata"]!.ToJsonString());
 	}
 
-	private async ValueTask<JsonNode> TokenAsync(Uri apiBaseUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string method, JsonNode parameters, string logPrefix, CancellationToken cancellationToken = default)
+	private async ValueTask<JsonNode> TokenAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string method, JsonNode parameters, string logPrefix, CancellationToken cancellationToken = default)
 	{
 		var token = await tokenUtensil.GetTokenAsync(
-			apiBaseUrl: apiBaseUrl,
+			apiUrl: apiUrl,
 			agentId: agentId,
 			secretKey: secretKey,
 			agentAccount: agentAccount,
@@ -394,9 +393,9 @@ internal class GameApiClient(
 							RetryCount = retryCount,
 							Response = response
 						});
-						await tokenUtensil.DeleteTokenAsync(apiBaseUrl, agentId, cancellationToken).ConfigureAwait(false);
+						await tokenUtensil.DeleteTokenAsync(apiUrl, agentId, cancellationToken).ConfigureAwait(false);
 						token = await tokenUtensil.GetTokenAsync(
-							apiBaseUrl: apiBaseUrl,
+							apiUrl: apiUrl,
 							agentId: agentId,
 							secretKey: secretKey,
 							agentAccount: agentAccount,
@@ -407,7 +406,7 @@ internal class GameApiClient(
 					});
 
 		return await retryPolicy.ExecuteAsync(() => PosetAsync(
-			apiBaseUrl: new Uri(apiBaseUrl, "/app/control_API/agents/api_doaction.php"),
+			apiUrl: new Uri(apiUrl, "/app/control_API/agents/api_doaction.php"),
 			agentId: agentId,
 			secretKey: secretKey,
 			method: method,
@@ -417,7 +416,7 @@ internal class GameApiClient(
 			.ConfigureAwait(false);
 	}
 
-	private async ValueTask<JsonNode> PosetAsync(Uri apiBaseUrl, int agentId, string secretKey, string method, JsonNode parameters, string logPrefix, CancellationToken cancellationToken = default)
+	private async ValueTask<JsonNode> PosetAsync(Uri apiUrl, int agentId, string secretKey, string method, JsonNode parameters, string logPrefix, CancellationToken cancellationToken = default)
 	{
 		parameters["timestamp"] = timeProvider.GetUtcNow().ToUnixTimeMilliseconds().ToString();
 		var request = cryptographyUtensil.Encrypt(parameters, secretKey);
@@ -437,7 +436,7 @@ internal class GameApiClient(
 		var sw = Stopwatch.StartNew();
 
 		var httpResponseMessage = await httpClient.PostAsync(
-			requestUri: apiBaseUrl,
+			requestUri: apiUrl,
 			content: jsonContent,
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);

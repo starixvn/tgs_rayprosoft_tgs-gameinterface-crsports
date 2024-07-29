@@ -3,22 +3,26 @@
 import "phoenix/protobuf/decimal.proto";
 import "google/protobuf/timestamp.proto";
 
-option csharp_namespace = "Tgs.GameInterface.GlobalTechnology.Protos";
+option csharp_namespace = "Tgs.GameInterface.CRSports.Protos";
 
-package GameInterfaceGlobalTechnology;
+package GameInterfaceCRSports;
 
-service GameInterfaceGlobalTechnology {
+// The greeting service definition.
+service GameInterfaceCRSports {
 	rpc PlayerCreate (PlayerCreateRequest) returns (BaseReply);
 	rpc PlayerBalance (PlayerBalanceRequest) returns (PlayerBalanceReply);
+	rpc PlayerOnline (PlayerOnlineRequest) returns (PlayerOnlineReply);
 	rpc PlayerLogout (PlayerLogoutRequest) returns (BaseReply);
 	rpc FundOut(FundRequest) returns (FundReply);
 	rpc FundIn (FundRequest) returns (FundReply);
 	rpc FundStatus(FundStatusRequest) returns (BaseReply);
 	rpc GameUrl (GameUrlRequest) returns (GameUrlReply);
-	rpc GameRecord (GameRecordRequest) returns (GameRecordReply);
+	rpc GameRecordBetting (GameRecordRequest) returns (GameRecordReply);
+	rpc GameRecordSettle (GameRecordRequest) returns (GameRecordReply);
 	rpc CheckingService(CheckingServiceRequest) returns (CheckingServiceReply);
 }
 
+// The request message containing the user's name.
 message AGLoginRequest {
   string api_url = 1;
   int32 agent_id = 2;
@@ -34,88 +38,86 @@ message PlayerCreateRequest {
   string agent_account = 4;
   string agent_password = 5;
   string player_code = 6;
-  string password = 7;
-  string currency = 8;
+  string currency = 7;
 }
 
 message PlayerBalanceRequest {
   string api_url = 1;
-  int32 brand_id = 2;
+  int32 agent_id = 2;
   string secret_key = 3;
-  string player_code = 4;
+  string agent_account = 4;
+  string agent_password = 5;
+  string player_code = 6;
+}
+
+message PlayerOnlineRequest {
+  string api_url = 1;
+  int32 agent_id = 2;
+  string secret_key = 3;
+  string agent_account = 4;
+  string agent_password = 5;
+  string player_code = 6;
 }
 
 message PlayerLogoutRequest  {
   string api_url = 1;
-  int32 brand_id = 2;
+  int32 agent_id = 2;
   string secret_key = 3;
-  string player_code = 4;
+  string agent_account = 4;
+  string agent_password = 5;
+  string player_code = 6;
 }
 
 message FundRequest {
   string api_url = 1;
-  int32 brand_id = 2;
+  int32 agent_id = 2;
   string secret_key = 3;
-  string player_code = 4;
-  string currency = 5;
-  string order_id = 6;
-  phoenix.protobuf.DecimalValue amount = 7;
+  string agent_account = 4;
+  string agent_password = 5;
+  string player_code = 6;
+  string order_id = 7;
+  phoenix.protobuf.DecimalValue amount = 8;
 }
 
 message FundStatusRequest {
   string api_url = 1;
-  int32 brand_id = 2;
+  int32 agent_id = 2;
   string secret_key = 3;
-  string order_id = 4;
+  string agent_account = 4;
+  string agent_password = 5;
+  string player_code = 6;
+  string order_id = 7;
 }
 
 message GameUrlRequest {
   string api_url = 1;
-  string launcher_api_url = 2;
-  int32 brand_id = 3;
-  string secret_key = 4;
-  string player_code = 5;
-  string currency = 6;
-  string language = 7;
+  int32 agent_id = 2;
+  string secret_key = 3;
+  string agent_account = 4;
+  string agent_password = 5;
+  string player_code = 6;
+  string currency = 7;
   bool is_mobile = 8;
-  string game_code = 9;
-}
-
-message GameUrlPlaytechByLiveRequest {
-  string api_url = 1;
-  string launcher_api_url = 2;
-  int32 brand_id = 3;
-  string secret_key = 4;
-  string player_code = 5;
-  string currency = 6;
-  string language = 7;
-  bool is_mobile = 8;
+  string language = 9;
+  string ip_address = 10;
 }
 
 message GameRecordRequest {
-  string data_api_url = 1;
-  int32 brand_id = 2;
+  string api_url = 1;
+  int32 agent_id = 2;
   string secret_key = 3;
-  google.protobuf.Timestamp start_time = 4; 
-  google.protobuf.Timestamp end_time = 5;
-  int32 page = 6;
-  int32 page_size = 7;
-}
-
-message GameRecordDetailRequest {
-  string data_api_url = 1;
-  int32 brand_id = 2;
-  string secret_key = 3;
-  string external_provider_code = 4;
-  string external_bet_id = 5;
-  google.protobuf.Timestamp external_end_time = 6;
-  string language = 7;
+  string agent_account = 4;
+  string agent_password = 5;
+  google.protobuf.Timestamp start_time = 6; 
+  google.protobuf.Timestamp end_time = 7;
+  int32 page = 8;
 }
 
 message CheckingServiceRequest{
   string machine_name = 1;
 }
 
+// The response message containing the greetings.
 message BaseReply{
   bool status = 1;
 }
@@ -124,6 +126,11 @@ message PlayerBalanceReply {
 	bool is_player_exist = 1;
 	phoenix.protobuf.DecimalValue balance = 2;
 }
+
+message PlayerOnlineReply {
+	bool online  = 1;
+}
+
 
 message FundReply {
 	string order_id = 1;
@@ -144,22 +151,26 @@ message GameRecordReply {
 message GameRecordInfo {
 	string player_code = 1;
 	string external_bet_id = 2;
-	string external_game_id = 3;
-	google.protobuf.Timestamp external_created_on = 4;
-	google.protobuf.Timestamp external_closed_on = 5;
-	bool is_free_game = 6;
-	bool is_bonus_game = 7;
-	phoenix.protobuf.DecimalValue bet = 8;
+	google.protobuf.Timestamp external_created_on = 3;
+	google.protobuf.Timestamp external_closed_on = 4;
+	GameRecordStatus status =5;
+	bool is_cash_out = 6;
+	phoenix.protobuf.DecimalValue bet = 7;
+	phoenix.protobuf.DecimalValue valid_bet = 8;
 	phoenix.protobuf.DecimalValue settle = 9;
 	phoenix.protobuf.DecimalValue win_loss = 10;
-	phoenix.protobuf.DecimalValue jackpot_contribution = 11;
-	phoenix.protobuf.DecimalValue jackpot_win = 12;
-	string additional_data = 13;
+	string additional_data = 11;
 }
 
-message GameRecordDetailReply {
-	bool is_support = 1;
-	string detail_url = 2;
+enum GameRecordStatus{
+	GAME_RECORD_STATUS_UNKNOWN = 0;
+	GAME_RECORD_STATUS_RUNNING = 1;
+	GAME_RECORD_STATUS_VOID = 2;
+	GAME_RECORD_STATUS_REFUND = 3;
+	GAME_RECORD_STATUS_REJECT = 4;
+	GAME_RECORD_STATUS_LOSE = 5;
+	GAME_RECORD_STATUS_WON = 6;
+	GAME_RECORD_STATUS_DRAW = 7;
 }
 
 message CheckingServiceReply{
@@ -169,3 +180,4 @@ message CheckingServiceReply{
 message AGLoginReply {
   string token = 1;
 }
+

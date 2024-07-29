@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Tgs.GameInterface.CRSports.Core.ApplicationServices;
+﻿namespace Tgs.GameInterface.CRSports.Core.ApplicationServices;
 public record GameRecordResult(
 	string PlayerCode,
 	string ExternalBetId,
-	string ExternalGameId,
 	DateTimeOffset ExternalCreatedOn,
 	DateTimeOffset ExternalClosedOn,
-	bool IsClosed,
+	Protos.GameRecordStatus Status,
 	bool IsCashOut,
 	decimal Bet,
 	decimal ValidBet,
