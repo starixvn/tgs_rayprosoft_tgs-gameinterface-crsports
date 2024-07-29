@@ -30,7 +30,7 @@ internal class GameRecordSettleQueryService(
 				"L" => Protos.GameRecordStatus.Lose,
 				"W" => Protos.GameRecordStatus.Won,
 				"P" => Protos.GameRecordStatus.Draw,
-				"D" => Protos.GameRecordStatus.Reject,
+				"D" => Protos.GameRecordStatus.Cancel,
 				_ => Protos.GameRecordStatus.Running,
 			};
 

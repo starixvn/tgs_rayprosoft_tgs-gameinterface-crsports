@@ -18,5 +18,5 @@ public static class ServiceCollectionExtensions
 		.AddSingleton(TimeProvider.System)
 		.AddSingleton<DateTimeConverter>()
 		.AddSingleton<ICryptographyUtensil, CryptographyUtensil>()
-		.AddSingleton<ITokenUtensil>((sp) => ActivatorUtilities.CreateInstance<TokenUtensil>(sp, redisDatabaseResolver(sp)));
+		.AddSingleton<ITokenUtensil>((sp) => ActivatorUtilities.CreateInstance<TokenUtensil>(sp, redisDatabaseResolver(sp), TimeSpan.FromMinutes(10)));
 }
