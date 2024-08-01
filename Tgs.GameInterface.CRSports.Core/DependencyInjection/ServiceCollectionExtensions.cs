@@ -21,7 +21,7 @@ public static class ServiceCollectionExtensions
 		.ConfigurePrimaryHttpMessageHandler(sp =>
 		{
 			var handler = new HttpClientHandler();
-			handler.SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13 | SslProtocols.Tls11 | SslProtocols.Tls | SslProtocols.Ssl3 | SslProtocols.Ssl2;
+			handler.SslProtocols = SslProtocols.Ssl3 | SslProtocols.Ssl2 | SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls;
 			handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
 			return handler;
 		})
