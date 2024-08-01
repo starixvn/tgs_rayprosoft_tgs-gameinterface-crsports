@@ -15,26 +15,8 @@ COPY ["Tgs.GameInterface.CRSports.Core/Tgs.GameInterface.CRSports.Core.csproj", 
 COPY ["Tgs.GameInterface.CRSports.Protos/Tgs.GameInterface.CRSports.Protos.csproj", "Tgs.GameInterface.CRSports.Protos/"]
 RUN dotnet restore "./Tgs.GameInterface.CRSports/Tgs.GameInterface.CRSports.csproj"
 ## .... 
-RUN sed -i 's/\[openssl_init\]/# \[openssl_init\]/g' /etc/ssl/openssl.cnf
-RUN sed -i '$a\[openssl_init]' /etc/ssl/openssl.cnf
-RUN sed -i '$a\providers = provider_sect' /etc/ssl/openssl.cnf
-RUN sed -i '$a\ssl_conf = ssl_sect' /etc/ssl/openssl.cnf
- 
-RUN sed -i '$a\[provider_sect]' /etc/ssl/openssl.cnf
-RUN sed -i '$a\default = default_sect' /etc/ssl/openssl.cnf
-RUN sed -i '$a\legacy = legacy_sect' /etc/ssl/openssl.cnf
- 
-RUN sed -i '$a\[default_sect]' /etc/ssl/openssl.cnf
-RUN sed -i '$a\activate = 1' /etc/ssl/openssl.cnf
- 
-RUN sed -i '$a\[legacy_sect]' /etc/ssl/openssl.cnf
-RUN sed -i '$a\activate = 1' /etc/ssl/openssl.cnf
- 
-RUN sed -i '$a\[ssl_sect]' /etc/ssl/openssl.cnf
-RUN sed -i '$a\system_default = system_default_sect' /etc/ssl/openssl.cnf
- 
-RUN sed -i '$a\[system_default_sect]' /etc/ssl/openssl.cnf
-RUN sed -i '$a\CipherString = DEFAULT:@SECLEVEL=0' /etc/ssl/openssl.cnf
+RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /etc/ssl/openssl.cnf
+RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /usr/lib/ssl/openssl.cnf
 ## .... 
 COPY . .
 WORKDIR "/src/Tgs.GameInterface.CRSports"
