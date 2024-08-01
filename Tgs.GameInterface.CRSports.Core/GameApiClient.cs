@@ -435,8 +435,6 @@ internal class GameApiClient(
 
 		var sw = Stopwatch.StartNew();
 
-		ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
-
 		var httpResponseMessage = await httpClient.PostAsync(
 			requestUri: apiUrl,
 			content: jsonContent,

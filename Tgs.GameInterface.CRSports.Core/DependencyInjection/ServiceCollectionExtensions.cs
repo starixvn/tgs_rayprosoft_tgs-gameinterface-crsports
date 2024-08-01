@@ -18,10 +18,12 @@ public static class ServiceCollectionExtensions
 			ServiceLifetime.Transient)
 		.AddHttpClient<IGameApiClient, GameApiClient>()
 
-		.ConfigurePrimaryHttpMessageHandler(x => new HttpClientHandler()
+		.ConfigurePrimaryHttpMessageHandler(sp =>
 		{
-			SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls,
-			UseDefaultCredentials = true
+			var handler = new HttpClientHandler();
+			handler.SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13 | SslProtocols.Tls11 | SslProtocols.Tls | SslProtocols.Ssl3 | SslProtocols.Ssl2;
+			handler.UseDefaultCredentials = true;
+			return handler;
 		})
 		.Services
 		.AddSingleton(TimeProvider.System)
