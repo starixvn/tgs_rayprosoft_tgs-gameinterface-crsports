@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Net;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -433,6 +434,8 @@ internal class GameApiClient(
 			});
 
 		var sw = Stopwatch.StartNew();
+
+		ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
 		var httpResponseMessage = await httpClient.PostAsync(
 			requestUri: apiUrl,
