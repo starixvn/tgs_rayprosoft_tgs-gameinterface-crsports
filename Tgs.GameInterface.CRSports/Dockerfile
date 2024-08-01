@@ -3,6 +3,10 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER app
 WORKDIR /app
+## .... 
+RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /etc/ssl/openssl.cnf
+RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /usr/lib/ssl/openssl.cnf
+## .... 
 EXPOSE 8080
 EXPOSE 8081
 
@@ -14,10 +18,6 @@ COPY ["Tgs.GameInterface.CRSports/Tgs.GameInterface.CRSports.csproj", "Tgs.GameI
 COPY ["Tgs.GameInterface.CRSports.Core/Tgs.GameInterface.CRSports.Core.csproj", "Tgs.GameInterface.CRSports.Core/"]
 COPY ["Tgs.GameInterface.CRSports.Protos/Tgs.GameInterface.CRSports.Protos.csproj", "Tgs.GameInterface.CRSports.Protos/"]
 RUN dotnet restore "./Tgs.GameInterface.CRSports/Tgs.GameInterface.CRSports.csproj"
-## .... 
-RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /etc/ssl/openssl.cnf
-RUN sed -i 's/DEFAULT@SECLEVEL=2/DEFAULT@SECLEVEL=1/g' /usr/lib/ssl/openssl.cnf
-## .... 
 COPY . .
 WORKDIR "/src/Tgs.GameInterface.CRSports"
 RUN dotnet build "./Tgs.GameInterface.CRSports.csproj" -c $BUILD_CONFIGURATION -o /app/build
