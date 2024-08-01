@@ -22,8 +22,7 @@ public static class ServiceCollectionExtensions
 		{
 			var handler = new HttpClientHandler();
 			handler.SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13 | SslProtocols.Tls11 | SslProtocols.Tls | SslProtocols.Ssl3 | SslProtocols.Ssl2;
-			handler.ServerCertificateCustomValidationCallback = delegate { return true; };
-			handler.UseDefaultCredentials = true;
+			handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
 			return handler;
 		})
 		.Services
