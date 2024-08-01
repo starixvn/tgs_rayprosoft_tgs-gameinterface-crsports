@@ -1,4 +1,4 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+﻿#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER app
@@ -14,6 +14,28 @@ COPY ["Tgs.GameInterface.CRSports/Tgs.GameInterface.CRSports.csproj", "Tgs.GameI
 COPY ["Tgs.GameInterface.CRSports.Core/Tgs.GameInterface.CRSports.Core.csproj", "Tgs.GameInterface.CRSports.Core/"]
 COPY ["Tgs.GameInterface.CRSports.Protos/Tgs.GameInterface.CRSports.Protos.csproj", "Tgs.GameInterface.CRSports.Protos/"]
 RUN dotnet restore "./Tgs.GameInterface.CRSports/Tgs.GameInterface.CRSports.csproj"
+## .... 
+RUN sed -i 's/\[openssl_init\]/# \[openssl_init\]/g' /etc/ssl/openssl.cnf
+RUN sed -i '$a\[openssl_init]' /etc/ssl/openssl.cnf
+RUN sed -i '$a\providers = provider_sect' /etc/ssl/openssl.cnf
+RUN sed -i '$a\ssl_conf = ssl_sect' /etc/ssl/openssl.cnf
+ 
+RUN sed -i '$a\[provider_sect]' /etc/ssl/openssl.cnf
+RUN sed -i '$a\default = default_sect' /etc/ssl/openssl.cnf
+RUN sed -i '$a\legacy = legacy_sect' /etc/ssl/openssl.cnf
+ 
+RUN sed -i '$a\[default_sect]' /etc/ssl/openssl.cnf
+RUN sed -i '$a\activate = 1' /etc/ssl/openssl.cnf
+ 
+RUN sed -i '$a\[legacy_sect]' /etc/ssl/openssl.cnf
+RUN sed -i '$a\activate = 1' /etc/ssl/openssl.cnf
+ 
+RUN sed -i '$a\[ssl_sect]' /etc/ssl/openssl.cnf
+RUN sed -i '$a\system_default = system_default_sect' /etc/ssl/openssl.cnf
+ 
+RUN sed -i '$a\[system_default_sect]' /etc/ssl/openssl.cnf
+RUN sed -i '$a\CipherString = DEFAULT:@SECLEVEL=0' /etc/ssl/openssl.cnf
+## .... 
 COPY . .
 WORKDIR "/src/Tgs.GameInterface.CRSports"
 RUN dotnet build "./Tgs.GameInterface.CRSports.csproj" -c $BUILD_CONFIGURATION -o /app/build
