@@ -310,6 +310,7 @@ internal class GameApiClient(
 			["currency"] = currency,
 			["machine"] = machine,
 			["langx"] = langx,
+			["isSSL"] = "Y",
 			["remoteip"] = remoteip
 		};
 
