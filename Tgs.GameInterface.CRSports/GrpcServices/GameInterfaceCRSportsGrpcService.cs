@@ -6,7 +6,21 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.GameInterface.CRSports.GrpcServices;
 
-public class GameInterfaceCRSportsGrpcService(
+public class GameInterfaceCRSportsGrpcService : GameInterfaceCRSports.GameInterfaceCRSportsBase
+{
+	private readonly ILogger<GameInterfaceCRSportsGrpcService> _logger;
+	private readonly IGetService<FundInQuery, FundResult> _fundInService;
+	private readonly IGetService<FundOutQuery, FundResult> _fundOutService;
+	private readonly IGetService<FundStatusQuery, bool> _fundStatusService;
+	private readonly IQueryService<GameRecordBettingQuery, GameRecordResult> _gameRecordBettingService;
+	private readonly IQueryService<GameRecordSettleQuery, GameRecordResult> _gameRecordSettleService;
+	private readonly IGetService<GameUrlQuery, GameUrlResult> _gameUrlService;
+	private readonly IGetService<PlayerBalanceQuery, PlayerBalanceResult> _playerBalanceService;
+	private readonly ICommandService<PlayerCreateCommand> _playerCreateService;
+	private readonly ICommandService<PlayerLogoutCommand> _playerLogoutService;
+	private readonly IGetService<PlayerOnlineQuery, bool> _playerOnlineService;
+
+	public GameInterfaceCRSportsGrpcService(
 	ILogger<GameInterfaceCRSportsGrpcService> logger,
 	IGetService<FundInQuery, FundResult> fundInService,
 	IGetService<FundOutQuery, FundResult> fundOutService,
@@ -18,11 +32,24 @@ public class GameInterfaceCRSportsGrpcService(
 	ICommandService<PlayerCreateCommand> playerCreateService,
 	ICommandService<PlayerLogoutCommand> playerLogoutService,
 	IGetService<PlayerOnlineQuery, bool> playerOnlineService
-	) : GameInterfaceCRSports.GameInterfaceCRSportsBase
-{
+	)
+	{
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+		_fundInService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
+		_fundOutService = fundOutService ?? throw new ArgumentNullException(nameof(fundOutService));
+		_fundStatusService = fundStatusService ?? throw new ArgumentNullException(nameof(fundStatusService));
+		_gameRecordBettingService = gameRecordBettingService ?? throw new ArgumentNullException(nameof(gameRecordBettingService));
+		_gameRecordSettleService = gameRecordSettleService ?? throw new ArgumentNullException(nameof(gameRecordSettleService));
+		_gameUrlService = gameUrlService ?? throw new ArgumentNullException(nameof(gameUrlService));
+		_playerBalanceService = playerBalanceService ?? throw new ArgumentNullException(nameof(playerBalanceService));
+		_playerCreateService = playerCreateService ?? throw new ArgumentNullException(nameof(playerCreateService));
+		_playerLogoutService = playerLogoutService ?? throw new ArgumentNullException(nameof(playerLogoutService));
+		_playerOnlineService = playerOnlineService ?? throw new ArgumentNullException(nameof(playerOnlineService));
+	}
+
 	public override Task<CheckingServiceReply> CheckingService(CheckingServiceRequest request, ServerCallContext context)
 	{
-		logger.LogWarning("LogOn:{logOn} Message: Create a check connection.({machineName})", DateTime.Now.ToString("o"), request.MachineName);
+		_logger.LogWarning("LogOn:{logOn} Message: Create a check connection.({machineName})", DateTime.Now.ToString("o"), request.MachineName);
 
 		return Task.FromResult(new CheckingServiceReply
 		{
@@ -44,7 +71,7 @@ public class GameInterfaceCRSportsGrpcService(
 			Amount = request.Amount
 		};
 
-		var result = await fundInService.GetAsync(
+		var result = await _fundInService.GetAsync(
 			query: query,
 			cancellationToken: context.CancellationToken)
 			.ConfigureAwait(false);
@@ -71,7 +98,7 @@ public class GameInterfaceCRSportsGrpcService(
 			Amount = request.Amount
 		};
 
-		var result = await fundOutService.GetAsync(
+		var result = await _fundOutService.GetAsync(
 			query: query,
 			cancellationToken: context.CancellationToken)
 			.ConfigureAwait(false);
@@ -97,7 +124,7 @@ public class GameInterfaceCRSportsGrpcService(
 			OrderId = request.OrderId
 		};
 
-		var result = await fundStatusService.GetAsync(
+		var result = await _fundStatusService.GetAsync(
 			query: query,
 			cancellationToken: context.CancellationToken)
 			.ConfigureAwait(false);
@@ -122,7 +149,7 @@ public class GameInterfaceCRSportsGrpcService(
 			Page = request.Page
 		};
 
-		var results = gameRecordBettingService.QueryAsync(
+		var results = _gameRecordBettingService.QueryAsync(
 			query: query,
 			cancellationToken: context.CancellationToken);
 
@@ -163,7 +190,7 @@ public class GameInterfaceCRSportsGrpcService(
 			Page = request.Page
 		};
 
-		var results = gameRecordSettleService.QueryAsync(
+		var results = _gameRecordSettleService.QueryAsync(
 			query: query,
 			cancellationToken: context.CancellationToken);
 
@@ -206,7 +233,7 @@ public class GameInterfaceCRSportsGrpcService(
 			IsMobile = request.IsMobile
 		};
 
-		var result = await gameUrlService.GetAsync(
+		var result = await _gameUrlService.GetAsync(
 			query: query,
 			cancellationToken: context.CancellationToken)
 			.ConfigureAwait(false);
@@ -230,7 +257,7 @@ public class GameInterfaceCRSportsGrpcService(
 			PlayerCode = request.PlayerCode
 		};
 
-		var result = await playerBalanceService.GetAsync(
+		var result = await _playerBalanceService.GetAsync(
 			query: query,
 			cancellationToken: context.CancellationToken)
 			.ConfigureAwait(false);
@@ -255,7 +282,7 @@ public class GameInterfaceCRSportsGrpcService(
 			Currency = request.Currency
 		};
 
-		await playerCreateService.ExecuteAsync(
+		await _playerCreateService.ExecuteAsync(
 		   command: command,
 		   cancellationToken: context.CancellationToken)
 		   .ConfigureAwait(false);
@@ -278,7 +305,7 @@ public class GameInterfaceCRSportsGrpcService(
 			PlayerCode = request.PlayerCode
 		};
 
-		await playerLogoutService.ExecuteAsync(
+		await _playerLogoutService.ExecuteAsync(
 		   command: command,
 		   cancellationToken: context.CancellationToken)
 		   .ConfigureAwait(false);
@@ -301,7 +328,7 @@ public class GameInterfaceCRSportsGrpcService(
 			PlayerCode = request.PlayerCode
 		};
 
-		var result = await playerOnlineService.GetAsync(
+		var result = await _playerOnlineService.GetAsync(
 			query: query,
 			cancellationToken: context.CancellationToken)
 			.ConfigureAwait(false);

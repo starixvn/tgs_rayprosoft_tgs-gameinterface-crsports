@@ -2,12 +2,19 @@
 
 namespace Tgs.GameInterface.CRSports.Core.ApplicationServices;
 
-internal class GameUrlGetService(
-	IGameApiClient client) : IGetService<GameUrlQuery, GameUrlResult>
+internal class GameUrlGetService : IGetService<GameUrlQuery, GameUrlResult>
 {
+	private readonly IGameApiClient _client;
+
+	public GameUrlGetService(
+		IGameApiClient client)
+	{
+		_client = client ?? throw new ArgumentNullException(nameof(client));
+	}
+
 	public async ValueTask<GameUrlResult> GetAsync(GameUrlQuery query, CancellationToken cancellationToken = default)
 	{
-		var resp = await client.LaunchGameAsync(
+		var resp = await _client.LaunchGameAsync(
 			apiUrl: query.ApiUrl,
 			agentId: query.AgentId,
 			secretKey: query.SecretKey,

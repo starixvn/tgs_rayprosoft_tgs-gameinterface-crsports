@@ -3,12 +3,19 @@ using System.Runtime.CompilerServices;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameInterface.CRSports.Core.ApplicationServices;
-internal class GameRecordSettleQueryService(
-	IGameApiClient client) : IQueryService<GameRecordSettleQuery, GameRecordResult>
+internal class GameRecordSettleQueryService : IQueryService<GameRecordSettleQuery, GameRecordResult>
 {
+	private readonly IGameApiClient _client;
+
+	public GameRecordSettleQueryService(
+		IGameApiClient client)
+	{
+		_client = client ?? throw new ArgumentNullException(nameof(client));
+	}
+
 	public async IAsyncEnumerable<GameRecordResult> QueryAsync(GameRecordSettleQuery query, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
-		var resps = client.ALLWagerAsync(
+		var resps = _client.ALLWagerAsync(
 			apiUrl: query.ApiUrl,
 			agentId: query.AgentId,
 			secretKey: query.SecretKey,

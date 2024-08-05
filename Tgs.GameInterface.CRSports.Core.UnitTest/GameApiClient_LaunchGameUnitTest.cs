@@ -1,10 +1,10 @@
 ﻿using System.Net;
 using System.Text.Json.Nodes;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using RichardSzalay.MockHttp;
-using Tgs.GameInterface.CRSports.Core;
 
 namespace Tgs.GameInterface.CRSports.Core.UnitTest;
 
@@ -22,7 +22,7 @@ public class GameApiClient_LaunchGameUnitTest
 		{
 			PlayerPassword = "TgsPassw0rd"
 		});
-		var fakeTimeProvider = Substitute.For<TimeProvider>();
+		var fakeSystemClock = Substitute.For<ISystemClock>();
 		var dateTimeConverter = new DateTimeConverter();
 		var fakeTokenUtensil = Substitute.For<ITokenUtensil>();
 		var fakeCryptographyUtensil = Substitute.For<ICryptographyUtensil>();
@@ -39,7 +39,7 @@ public class GameApiClient_LaunchGameUnitTest
 		var remoteip = "127.0.0.1";
 
 		var timeProvider = DateTimeOffset.FromUnixTimeMilliseconds(1721976666753);
-		_ = fakeTimeProvider.GetUtcNow().Returns(timeProvider);
+		_ = fakeSystemClock.UtcNow.Returns(timeProvider);
 
 		var token = Guid.NewGuid().ToString("N");
 		_ = fakeTokenUtensil.GetTokenAsync(
@@ -73,18 +73,17 @@ public class GameApiClient_LaunchGameUnitTest
 			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
 		var httpClient = handler.ToHttpClient();
 
-		var decrypt = JsonNode.Parse("""
-			{
-				"memname": "4uf6k014jp5x",
-				"method": "LaunchGame",
-				"launchgameurl": "http://exm428.rake23678.com/app/member_api/FT_index.php?mtype=3\\u0026uid=dh4ug1nm28831508l987369\\u0026langx=zh-tw\\u0026news_mem=Y\\u0026news_api=Y\\u0026isSSL=N",
-				"responeid": "23681698801",
-				"respcode": "0000",
-				"memToken": "dh4ug1nm28831508l987369",
-				"status": "success",
-				"timestamp": "1721976667716"
-			}
-			""");
+		var decrypt = new JsonObject
+		{
+			["memname"] = "4uf6k014jp5x",
+			["method"] = "LaunchGame",
+			["launchgameurl"] = "http://exm428.rake23678.com/app/member_api/FT_index.php?mtype=3\\u0026uid=dh4ug1nm28831508l987369\\u0026langx=zh-tw\\u0026news_mem=Y\\u0026news_api=Y\\u0026isSSL=N",
+			["responeid"] = "23681698801",
+			["respcode"] = "0000",
+			["memToken"] = "dh4ug1nm28831508l987369",
+			["status"] = "success",
+			["timestamp"] = "1721976667716"
+		};
 		_ = fakeCryptographyUtensil.Decrypt(
 			Arg.Is(responseContent),
 			Arg.Is(secretKey))
@@ -95,7 +94,7 @@ public class GameApiClient_LaunchGameUnitTest
 			fakerLogger,
 			fakePolicySettingsOptions,
 			fakeGameInterfaceOptions,
-			fakeTimeProvider,
+			fakeSystemClock,
 			dateTimeConverter,
 			fakeTokenUtensil,
 			fakeCryptographyUtensil,

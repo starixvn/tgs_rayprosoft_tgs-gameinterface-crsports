@@ -3,12 +3,19 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.GameInterface.CRSports.Core.ApplicationServices;
 
-internal class GameRecordBettingQueryService(
-	IGameApiClient client) : IQueryService<GameRecordBettingQuery, GameRecordResult>
+internal class GameRecordBettingQueryService : IQueryService<GameRecordBettingQuery, GameRecordResult>
 {
+	private readonly IGameApiClient _client;
+
+	public GameRecordBettingQueryService(
+		IGameApiClient client)
+	{
+		_client = client ?? throw new ArgumentNullException(nameof(client));
+	}
+
 	public async IAsyncEnumerable<GameRecordResult> QueryAsync(GameRecordBettingQuery query, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
-		var resps = client.ALLWagerAsync(
+		var resps = _client.ALLWagerAsync(
 			apiUrl: query.ApiUrl,
 			agentId: query.AgentId,
 			secretKey: query.SecretKey,

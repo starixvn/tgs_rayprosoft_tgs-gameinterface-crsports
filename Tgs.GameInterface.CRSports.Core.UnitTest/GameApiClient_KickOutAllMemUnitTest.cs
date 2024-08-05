@@ -1,10 +1,10 @@
 ﻿using System.Net;
 using System.Text.Json.Nodes;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using RichardSzalay.MockHttp;
-using Tgs.GameInterface.CRSports.Core;
 
 namespace Tgs.GameInterface.CRSports.Core.UnitTest;
 
@@ -22,7 +22,7 @@ public class GameApiClient_KickOutAllMemUnitTest
 		{
 			PlayerPassword = "TgsPassw0rd"
 		});
-		var fakeTimeProvider = Substitute.For<TimeProvider>();
+		var fakeSystemClock = Substitute.For<ISystemClock>();
 		var dateTimeConverter = new DateTimeConverter();
 		var fakeTokenUtensil = Substitute.For<ITokenUtensil>();
 		var fakeCryptographyUtensil = Substitute.For<ICryptographyUtensil>();
@@ -34,7 +34,7 @@ public class GameApiClient_KickOutAllMemUnitTest
 		var agentPassword = "aaa123";
 
 		var timeProvider = DateTimeOffset.FromUnixTimeMilliseconds(1721971001210);
-		_ = fakeTimeProvider.GetUtcNow().Returns(timeProvider);
+		_ = fakeSystemClock.UtcNow.Returns(timeProvider);
 
 		var token = Guid.NewGuid().ToString("N");
 		_ = fakeTokenUtensil.GetTokenAsync(
@@ -62,14 +62,13 @@ public class GameApiClient_KickOutAllMemUnitTest
 			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
 		var httpClient = handler.ToHttpClient();
 
-		var decrypt = JsonNode.Parse("""
-			{
-				"Error": "success",
-				"responeid": "20837684617",
-				"respcode": "0000",
-				"timestamp": "1721971001595"
-			}
-			""");
+		var decrypt = new JsonObject
+		{
+			["Error"] = "success",
+			["responeid"] = "20837684617",
+			["respcode"] = "0000",
+			["timestamp"] = "1721971001595"
+		};
 		_ = fakeCryptographyUtensil.Decrypt(
 			Arg.Is(responseContent),
 			Arg.Is(secretKey))
@@ -80,7 +79,7 @@ public class GameApiClient_KickOutAllMemUnitTest
 			fakerLogger,
 			fakePolicySettingsOptions,
 			fakeGameInterfaceOptions,
-			fakeTimeProvider,
+			fakeSystemClock,
 			dateTimeConverter,
 			fakeTokenUtensil,
 			fakeCryptographyUtensil,

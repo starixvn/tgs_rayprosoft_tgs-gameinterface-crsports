@@ -1,10 +1,10 @@
 ﻿using System.Net;
 using System.Text.Json.Nodes;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using RichardSzalay.MockHttp;
-using Tgs.GameInterface.CRSports.Core;
 
 namespace Tgs.GameInterface.CRSports.Core.UnitTest;
 
@@ -22,7 +22,7 @@ public class GameApiClient_ChkTransInfoUnitTest
 		{
 			PlayerPassword = "TgsPassw0rd"
 		});
-		var fakeTimeProvider = Substitute.For<TimeProvider>();
+		var fakeSystemClock = Substitute.For<ISystemClock>();
 		var dateTimeConverter = new DateTimeConverter();
 		var fakeTokenUtensil = Substitute.For<ITokenUtensil>();
 		var fakeCryptographyUtensil = Substitute.For<ICryptographyUtensil>();
@@ -36,7 +36,7 @@ public class GameApiClient_ChkTransInfoUnitTest
 		var payno = "AAD8AC04-D8C3-4699-BE8A-1148585CEE61";
 
 		var timeProvider = DateTimeOffset.FromUnixTimeMilliseconds(1721981820605);
-		_ = fakeTimeProvider.GetUtcNow().Returns(timeProvider);
+		_ = fakeSystemClock.UtcNow.Returns(timeProvider);
 
 		var token = Guid.NewGuid().ToString("N");
 		_ = fakeTokenUtensil.GetTokenAsync(
@@ -67,18 +67,17 @@ public class GameApiClient_ChkTransInfoUnitTest
 			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
 		var httpClient = handler.ToHttpClient();
 
-		var decrypt = JsonNode.Parse("""
-			{
-				"memname": "4uf6k014jp5x",
-				"balance": "0.00",
-				"method": "chkMemberBalance",
-				"currency": "HKD",
-				"responeid": "17837574323",
-				"respcode": "0000",
-				"status": "success",
-				"timestamp": "1721976098451"
-			}
-			""");
+		var decrypt = new JsonObject
+		{
+			["memname"] = "4uf6k014jp5x",
+			["balance"] = "0.00",
+			["method"] = "chkMemberBalance",
+			["currency"] = "HKD",
+			["responeid"] = "17837574323",
+			["respcode"] = "0000",
+			["status"] = "success",
+			["timestamp"] = "1721976098451"
+		};
 		_ = fakeCryptographyUtensil.Decrypt(
 			Arg.Is(responseContent),
 			Arg.Is(secretKey))
@@ -89,7 +88,7 @@ public class GameApiClient_ChkTransInfoUnitTest
 			fakerLogger,
 			fakePolicySettingsOptions,
 			fakeGameInterfaceOptions,
-			fakeTimeProvider,
+			fakeSystemClock,
 			dateTimeConverter,
 			fakeTokenUtensil,
 			fakeCryptographyUtensil,
@@ -121,7 +120,7 @@ public class GameApiClient_ChkTransInfoUnitTest
 		{
 			PlayerPassword = "TgsPassw0rd"
 		});
-		var fakeTimeProvider = Substitute.For<TimeProvider>();
+		var fakeSystemClock = Substitute.For<ISystemClock>();
 		var dateTimeConverter = new DateTimeConverter();
 		var fakeTokenUtensil = Substitute.For<ITokenUtensil>();
 		var fakeCryptographyUtensil = Substitute.For<ICryptographyUtensil>();
@@ -135,7 +134,7 @@ public class GameApiClient_ChkTransInfoUnitTest
 		var payno = "AAD8AC04-D8C3-4699-BE8A-1148585CEE61";
 
 		var timeProvider = DateTimeOffset.FromUnixTimeMilliseconds(1721981820605);
-		_ = fakeTimeProvider.GetUtcNow().Returns(timeProvider);
+		_ = fakeSystemClock.UtcNow.Returns(timeProvider);
 
 		var token = Guid.NewGuid().ToString("N");
 		_ = fakeTokenUtensil.GetTokenAsync(
@@ -166,14 +165,13 @@ public class GameApiClient_ChkTransInfoUnitTest
 			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
 		var httpClient = handler.ToHttpClient();
 
-		var decrypt = JsonNode.Parse("""
-			{
-				"Error": "cash_record error: no data for search",
-				"responeid": "18837763211",
-				"respcode": "0003",
-				"timestamp": "1721981837765"
-			}
-			""");
+		var decrypt = new JsonObject
+		{
+			["Error"] = "cash_record error: no data for search",
+			["responeid"] = "18837763211",
+			["respcode"] = "0003",
+			["timestamp"] = "1721981837765"
+		};
 		_ = fakeCryptographyUtensil.Decrypt(
 			Arg.Is(responseContent),
 			Arg.Is(secretKey))
@@ -184,7 +182,7 @@ public class GameApiClient_ChkTransInfoUnitTest
 			fakerLogger,
 			fakePolicySettingsOptions,
 			fakeGameInterfaceOptions,
-			fakeTimeProvider,
+			fakeSystemClock,
 			dateTimeConverter,
 			fakeTokenUtensil,
 			fakeCryptographyUtensil,

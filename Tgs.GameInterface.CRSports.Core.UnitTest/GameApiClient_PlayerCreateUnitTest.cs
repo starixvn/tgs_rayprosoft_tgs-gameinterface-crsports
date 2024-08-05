@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using RichardSzalay.MockHttp;
 using Microsoft.Extensions.Options;
-using Tgs.GameInterface.CRSports.Core;
+using Microsoft.AspNetCore.Authentication;
 
 namespace Tgs.GameInterface.CRSports.Core.UnitTest;
 
@@ -22,7 +22,7 @@ public class GameApiClient_PlayerCreateUnitTest
 		{
 			PlayerPassword = "TgsPassw0rd"
 		});
-		var fakeTimeProvider = Substitute.For<TimeProvider>();
+		var fakeSystemClock = Substitute.For<ISystemClock>();
 		var dateTimeConverter = new DateTimeConverter();
 		var fakeTokenUtensil = Substitute.For<ITokenUtensil>();
 		var fakeCryptographyUtensil = Substitute.For<ICryptographyUtensil>();
@@ -36,7 +36,7 @@ public class GameApiClient_PlayerCreateUnitTest
 		var currency = "HKD";
 
 		var timeProvider = DateTimeOffset.FromUnixTimeMilliseconds(1721971001210);
-		_ = fakeTimeProvider.GetUtcNow().Returns(timeProvider);
+		_ = fakeSystemClock.UtcNow.Returns(timeProvider);
 
 		var token = Guid.NewGuid().ToString("N");
 		_ = fakeTokenUtensil.GetTokenAsync(
@@ -67,14 +67,13 @@ public class GameApiClient_PlayerCreateUnitTest
 			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
 		var httpClient = handler.ToHttpClient();
 
-		var decrypt = JsonNode.Parse("""
-			{
-				"Error": "success",
-				"responeid": "20837684617",
-				"respcode": "0000",
-				"timestamp": "1721971001595"
-			}
-			""");
+		var decrypt = new JsonObject
+		{
+			["Error"] = "success",
+			["responeid"] = "20837684617",
+			["respcode"] = "0000",
+			["timestamp"] = "1721971001595"
+		};
 		_ = fakeCryptographyUtensil.Decrypt(
 			Arg.Is(responseContent),
 			Arg.Is(secretKey))
@@ -85,7 +84,7 @@ public class GameApiClient_PlayerCreateUnitTest
 			fakerLogger,
 			fakePolicySettingsOptions,
 			fakeGameInterfaceOptions,
-			fakeTimeProvider,
+			fakeSystemClock,
 			dateTimeConverter,
 			fakeTokenUtensil,
 			fakeCryptographyUtensil,
@@ -115,7 +114,7 @@ public class GameApiClient_PlayerCreateUnitTest
 		{
 			PlayerPassword = "TgsPassw0rd"
 		});
-		var fakeTimeProvider = Substitute.For<TimeProvider>();
+		var fakeSystemClock = Substitute.For<ISystemClock>();
 		var dateTimeConverter = new DateTimeConverter();
 		var fakeTokenUtensil = Substitute.For<ITokenUtensil>();
 		var fakeCryptographyUtensil = Substitute.For<ICryptographyUtensil>();
@@ -129,7 +128,7 @@ public class GameApiClient_PlayerCreateUnitTest
 		var currency = "HKD";
 
 		var timeProvider = DateTimeOffset.FromUnixTimeMilliseconds(1721971001210);
-		_ = fakeTimeProvider.GetUtcNow().Returns(timeProvider);
+		_ = fakeSystemClock.UtcNow.Returns(timeProvider);
 
 		var token = Guid.NewGuid().ToString("N");
 		_ = fakeTokenUtensil.GetTokenAsync(
@@ -160,14 +159,13 @@ public class GameApiClient_PlayerCreateUnitTest
 			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
 		var httpClient = handler.ToHttpClient();
 
-		var decrypt = JsonNode.Parse("""
-			{
-				"Error": "can not CreateMember: \\u8F38\\u5165\\u7684\\u5E33\\u865F\\u5DF2\\u7D93\\u6709\\u4EBA\\u4F7F\\u7528",
-				"responeid": "20837684617",
-				"respcode": "0008",
-				"timestamp": "1721971001595"
-			}
-			""");
+		var decrypt = new JsonObject
+		{
+			["Error"] = "can not CreateMember: \\u8F38\\u5165\\u7684\\u5E33\\u865F\\u5DF2\\u7D93\\u6709\\u4EBA\\u4F7F\\u7528",
+			["responeid"] = "20837684617",
+			["respcode"] = "0008",
+			["timestamp"] = "1721971001595"
+		};
 		_ = fakeCryptographyUtensil.Decrypt(
 			Arg.Is(responseContent),
 			Arg.Is(secretKey))
@@ -178,7 +176,7 @@ public class GameApiClient_PlayerCreateUnitTest
 			fakerLogger,
 			fakePolicySettingsOptions,
 			fakeGameInterfaceOptions,
-			fakeTimeProvider,
+			fakeSystemClock,
 			dateTimeConverter,
 			fakeTokenUtensil,
 			fakeCryptographyUtensil,

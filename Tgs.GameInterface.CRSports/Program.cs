@@ -1,15 +1,12 @@
 ﻿using System.Net.Mime;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
-using NATS.Client.Core;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Tgs.GameInterface.CRSports;
 using Tgs.GameInterface.CRSports.Core;
 using Tgs.GameInterface.CRSports.GrpcServices;
-using Tgs.GameInterface.CRSports.Messages;
-using Tgs.MessageQueue.Nats.Serializers;
 
 var filterInstrumentations = new[] { "html", "ico", "png", "jpg" };
 
@@ -86,20 +83,6 @@ builder.Services
 	.AddSingleton<RedisConnectionManager>()
 	.AddGameInterfaceCore(
 	(sp) => sp.GetRequiredService<RedisConnectionManager>().Database);
-
-builder.Services
-	.AddKeyedSingleton("Nats", (sp, _) => new NatsConnection(NatsOpts.Default with
-	{
-		Url = builder.Configuration.GetConnectionString("Nats")!,
-		SerializerRegistry = TgsNatsSerializerRegistration.Default
-	}))
-	.AddMessageQueue()
-	.AddNatsMessageQueue(config => config
-		.ConfigureResolveConnection(sp => sp.GetRequiredKeyedService<NatsConnection>("Nats"))
-		.AddProcessor<AGLoginMessageHandler>("gp.gameinterface.cr.aglogin", "gp.gameinterface.cr.aglogin"))
-	.ClearAllExchanges()
-	.AddNatsGlobPatternExchange("gp.gameinterface.cr.aglogin")
-	.AddNatsGlobPatternExchange("_INBOX.*");
 
 builder.Services
 	.AddOpenTelemetry()

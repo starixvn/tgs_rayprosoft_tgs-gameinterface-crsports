@@ -2,12 +2,19 @@
 
 namespace Tgs.GameInterface.CRSports.Core.ApplicationServices;
 
-internal class PlayerBalanceGetService(
-	IGameApiClient client) : IGetService<PlayerBalanceQuery, PlayerBalanceResult>
+internal class PlayerBalanceGetService : IGetService<PlayerBalanceQuery, PlayerBalanceResult>
 {
+	private readonly IGameApiClient _client;
+
+	public PlayerBalanceGetService(
+		IGameApiClient client)
+	{
+		_client = client ?? throw new ArgumentNullException(nameof(client));
+	}
+
 	public async ValueTask<PlayerBalanceResult> GetAsync(PlayerBalanceQuery query, CancellationToken cancellationToken = default)
 	{
-		var resp = await client.ChkMemberBalanceAsync(
+		var resp = await _client.ChkMemberBalanceAsync(
 			apiUrl: query.ApiUrl,
 			agentId: query.AgentId,
 			secretKey: query.SecretKey,

@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
+﻿using System.Net;
 using System.Text.Json.Nodes;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using RichardSzalay.MockHttp;
 
 namespace Tgs.GameInterface.CRSports.Core.UnitTest;
+
 public class GameApiClientUnitTest
 {
 	[Fact]
@@ -25,7 +22,7 @@ public class GameApiClientUnitTest
 		{
 			PlayerPassword = "TgsPassw0rd"
 		});
-		var fakeTimeProvider = Substitute.For<TimeProvider>();
+		var fakeSystemClock = Substitute.For<ISystemClock>();
 		var dateTimeConverter = new DateTimeConverter();
 		var fakeTokenUtensil = Substitute.For<ITokenUtensil>();
 		var fakeCryptographyUtensil = Substitute.For<ICryptographyUtensil>();
@@ -38,7 +35,7 @@ public class GameApiClientUnitTest
 		var memname = "4uf6k014jp5x";
 
 		var timeProvider = DateTimeOffset.FromUnixTimeMilliseconds(1721971001210);
-		_ = fakeTimeProvider.GetUtcNow().Returns(timeProvider);
+		_ = fakeSystemClock.UtcNow.Returns(timeProvider);
 
 		var tokenVerificationError = Guid.NewGuid().ToString("N");
 		var token = Guid.NewGuid().ToString("N");
@@ -75,24 +72,22 @@ public class GameApiClientUnitTest
 			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
 		var httpClient = handler.ToHttpClient();
 
-		var decryptVerificationError = JsonNode.Parse("""
-			{
-				"respcode": "0002",
-				"status": "Token 驗證錯誤"
-			}
-			""");
-		var decrypt = JsonNode.Parse("""
-			{
-				"memname": "4uf6k014jp5x",
-				"balance": "0.00",
-				"method": "chkMemberBalance",
-				"currency": "HKD",
-				"responeid": "17837574323",
-				"respcode": "0000",
-				"status": "success",
-				"timestamp": "1721976098451"
-			}
-			""");
+		var decryptVerificationError = new JsonObject
+		{
+			["respcode"] = "0002",
+			["status"] = "Token 驗證錯誤"
+		};
+		var decrypt = new JsonObject
+		{
+			["memname"] = "4uf6k014jp5x",
+			["balance"] = "0.00",
+			["method"] = "chkMemberBalance",
+			["currency"] = "HKD",
+			["responeid"] = "17837574323",
+			["respcode"] = "0000",
+			["status"] = "success",
+			["timestamp"] = "1721976098451"
+		};
 		_ = fakeCryptographyUtensil.Decrypt(
 			Arg.Is(responseContent),
 			Arg.Is(secretKey))
@@ -103,7 +98,7 @@ public class GameApiClientUnitTest
 			fakerLogger,
 			fakePolicySettingsOptions,
 			fakeGameInterfaceOptions,
-			fakeTimeProvider,
+			fakeSystemClock,
 			dateTimeConverter,
 			fakeTokenUtensil,
 			fakeCryptographyUtensil,

@@ -8,7 +8,10 @@ internal class CryptographyUtensil : ICryptographyUtensil
 {
 	public JsonNode Decrypt(string content, string key)
 	{
-		ArgumentException.ThrowIfNullOrEmpty(content);
+		if (string.IsNullOrWhiteSpace(content))
+		{
+			throw new ArgumentNullException(content);
+		}
 
 		byte[] cipherText = Convert.FromBase64String(content);
 
@@ -26,7 +29,10 @@ internal class CryptographyUtensil : ICryptographyUtensil
 
 	public string Encrypt(JsonNode source, string key)
 	{
-		ArgumentException.ThrowIfNullOrEmpty(source.ToJsonString());
+		if (string.IsNullOrWhiteSpace(source.ToJsonString()))
+		{
+			throw new ArgumentNullException(nameof(source));
+		}
 
 		var toEncryptArray = Encoding.UTF8.GetBytes(source.ToJsonString());
 

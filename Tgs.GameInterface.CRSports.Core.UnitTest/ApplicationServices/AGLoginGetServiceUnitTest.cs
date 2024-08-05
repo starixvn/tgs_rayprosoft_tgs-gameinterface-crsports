@@ -8,7 +8,7 @@ public class AGLoginGetServiceUnitTest
 	[Fact]
 	public async Task Normal_Process()
 	{
-		var fakeGameApiClient = Substitute.For<IGameApiClient>();
+		var fakeAGLoginApiClient = Substitute.For<IAGLoginApiClient>();
 
 		var query = new AGLoginQuery
 		{
@@ -21,7 +21,7 @@ public class AGLoginGetServiceUnitTest
 
 		var token = Guid.NewGuid().ToString();
 
-		_ = fakeGameApiClient.AGLoginAsync(
+		_ = fakeAGLoginApiClient.AGLoginAsync(
 			apiUrl: Arg.Is(query.ApiUrl),
 			agentId: Arg.Is(query.AgentId),
 			secretKey: Arg.Is(query.SecretKey),
@@ -30,7 +30,7 @@ public class AGLoginGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(token);
 
-		var sut = new AGLoginGetService(fakeGameApiClient);
+		var sut = new AGLoginGetService(fakeAGLoginApiClient);
 
 		var actual = await sut.GetAsync(
 			query: query,
