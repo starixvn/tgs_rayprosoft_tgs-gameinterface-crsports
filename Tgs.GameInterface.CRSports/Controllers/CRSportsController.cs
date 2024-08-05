@@ -13,44 +13,18 @@ namespace Tgs.GameInterface.CRSports.Controllers;
 public class CRSportsController : ControllerBase
 {
 	/// <summary>
-	/// Ags the login v2 asynchronous.
+	/// Ags the login asynchronous.
 	/// </summary>
 	/// <param name="service">The service.</param>
 	/// <param name="source">The source.</param>
 	/// <returns></returns>
-	[HttpPost("aglogin/v2", Name = "AGLoginV2")]
-	public ValueTask<string> AGLoginV2Async(
+	[HttpPost("aglogin", Name = "AGLogin")]
+	public ValueTask<string> AGLoginAsync(
 		[FromServices] IGetService<AGLoginQuery, string> service,
 		[FromBody] AGLoginQuery source)
 		=> service.GetAsync(
 			query: source,
 			cancellationToken: HttpContext.RequestAborted);
-	/// <summary>
-	/// Ags the login asynchronous.
-	/// </summary>
-	/// <param name="messageSender">The message sender.</param>
-	/// <param name="source">The source.</param>
-	/// <returns></returns>
-	[HttpPost("aglogin", Name = "AGLogin")]
-	public async ValueTask<string> AGLoginAsync(
-		[FromServices] IMessageSender messageSender,
-		[FromBody] AGLoginQuery source)
-	{
-		var reply = await messageSender.RequestAsync<AGLoginRequest, AGLoginReply>(
-			subject: "gp.gameinterface.cr.aglogin",
-			data: new AGLoginRequest
-			{
-				ApiUrl = source.ApiUrl.ToString(),
-				AgentId = source.AgentId,
-				SecretKey = source.SecretKey,
-				AgentAccount = source.AgentAccount,
-				AgentPassword = source.AgentPassword
-			},
-			cancellationToken: HttpContext.RequestAborted)
-			.ConfigureAwait(false);
-
-		return reply.Token;
-	}
 
 	/// <summary>
 	/// Funds the out asynchronous.

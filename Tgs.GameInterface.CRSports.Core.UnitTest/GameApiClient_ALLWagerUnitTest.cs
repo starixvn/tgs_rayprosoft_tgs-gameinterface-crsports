@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Text.Json.Nodes;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -22,7 +23,7 @@ public class GameApiClient_ALLWagerUnitTest
 		{
 			PlayerPassword = "TgsPassw0rd"
 		});
-		var fakeTimeProvider = Substitute.For<TimeProvider>();
+		var fakeSystemClock = Substitute.For<ISystemClock>();
 		var dateTimeConverter = new DateTimeConverter();
 		var fakeTokenUtensil = Substitute.For<ITokenUtensil>();
 		var fakeCryptographyUtensil = Substitute.For<ICryptographyUtensil>();
@@ -38,7 +39,7 @@ public class GameApiClient_ALLWagerUnitTest
 		var page = 1;
 
 		var timeProvider = DateTimeOffset.FromUnixTimeMilliseconds(1721985116406);
-		_ = fakeTimeProvider.GetUtcNow().Returns(timeProvider);
+		_ = fakeSystemClock.UtcNow.Returns(timeProvider);
 
 		var token = Guid.NewGuid().ToString("N");
 		_ = fakeTokenUtensil.GetTokenAsync(
@@ -70,62 +71,61 @@ public class GameApiClient_ALLWagerUnitTest
 			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
 		var httpClient = handler.ToHttpClient();
 
-		var decrypt = JsonNode.Parse("""
-			{
-				"agname": "RT706test1",
-				"wager_cashout": [],
-				"method": "ALLWager",
-				"responeid": "18837809387",
-				"page": "1",
-				"agid": "3238",
-				"wager_totalpage": "1",
-				"respcode": "0000",
-				"wager_data": [
-					{
-						"oddsFormat": "0.5 / 1",
-						"strong": "C",
-						"gtype": "FT",
-						"degold": "2.000",
-						"settle": "0",
-						"mid": "28831508",
-						"wingold_d": "3.90",
-						"orderdate": "2024-07-26",
-						"wingold": "4.08",
-						"gold": "2.000",
-						"result": "0",
-						"rtype": "Running Ball-Home",
-						"score": "0:0",
-						"tname_home": "Real Murcia",
-						"gold_d": "1.91",
-						"cashoutid": "0",
-						"odds": "H",
-						"wtypecode": "RE",
-						"currency": "HKD",
-						"degold_d": "1.910",
-						"id": "438050329",
-						"adddate": "2024-07-26 04:31:51",
-						"order": "Real Murcia",
-						"cashout_d": "0.000",
-						"tname_away": "Millwall",
-						"handicap": "2",
-						"pname": "",
-						"IP": "185.196.0.16",
-						"league": "Club Friendlies",
-						"ioratio": "1.04",
-						"rtypecode": "REH",
-						"ordertime": "04:30:00",
-						"cashout": "0.000",
-						"report_test": "",
-						"wtype": "Running Ball",
-						"resultdetail": "0",
-						"result_score": "",
-						"username": "4uf6k014jp5x"
+		var decrypt = new JsonObject
+		{
+			["agname"] = "RT706test1",
+			["wager_cashout"] = new JsonArray { },
+			["method"] = "ALLWager",
+			["responeid"] = "18837809387",
+			["page"] = "1",
+			["agid"] = "3238",
+			["wager_totalpage"] = "1",
+			["respcode"] = "0000",
+			["wager_data"] = new JsonArray {
+					new JsonObject{
+						["oddsFormat"]= "0.5 / 1",
+						["strong"]= "C",
+						["gtype"]= "FT",
+						["degold"]= "2.000",
+						["settle"]= "0",
+						["mid"]= "28831508",
+						["wingold_d"]= "3.90",
+						["orderdate"]= "2024-07-26",
+						["wingold"]= "4.08",
+						["gold"]= "2.000",
+						["result"]= "0",
+						["rtype"]= "Running Ball-Home",
+						["score"]= "0:0",
+						["tname_home"]= "Real Murcia",
+						["gold_d"]= "1.91",
+						["cashoutid"]= "0",
+						["odds"]= "H",
+						["wtypecode"]= "RE",
+						["currency"]= "HKD",
+						["degold_d"]= "1.910",
+						["id"]= "438050329",
+						["adddate"]= "2024-07-26 04:31:51",
+						["order"]= "Real Murcia",
+						["cashout_d"]= "0.000",
+						["tname_away"]= "Millwall",
+						["handicap"]= "2",
+						["pname"]= "",
+						["IP"]= "185.196.0.16",
+						["league"]= "Club Friendlies",
+						["ioratio"]= "1.04",
+						["rtypecode"]= "REH",
+						["ordertime"]= "04:30:00",
+						["cashout"]= "0.000",
+						["report_test"]= "",
+						["wtype"]= "Running Ball",
+						["resultdetail"]= "0",
+						["result_score"]= "",
+						["username"]= "4uf6k014jp5x"
 					}
-				],
-				"status": "success",
-				"timestamp": "1721985899034"
-			}
-			""");
+				},
+			["status"] = "success",
+			["timestamp"] = "1721985899034"
+		};
 		_ = fakeCryptographyUtensil.Decrypt(
 			Arg.Is(responseContent),
 			Arg.Is(secretKey))
@@ -136,7 +136,7 @@ public class GameApiClient_ALLWagerUnitTest
 			fakerLogger,
 			fakePolicySettingsOptions,
 			fakeGameInterfaceOptions,
-			fakeTimeProvider,
+			fakeSystemClock,
 			dateTimeConverter,
 			fakeTokenUtensil,
 			fakeCryptographyUtensil,
@@ -182,7 +182,7 @@ public class GameApiClient_ALLWagerUnitTest
 		{
 			PlayerPassword = "TgsPassw0rd"
 		});
-		var fakeTimeProvider = Substitute.For<TimeProvider>();
+		var fakeSystemClock = Substitute.For<ISystemClock>();
 		var dateTimeConverter = new DateTimeConverter();
 		var fakeTokenUtensil = Substitute.For<ITokenUtensil>();
 		var fakeCryptographyUtensil = Substitute.For<ICryptographyUtensil>();
@@ -198,7 +198,7 @@ public class GameApiClient_ALLWagerUnitTest
 		var page = 1;
 
 		var timeProvider = DateTimeOffset.FromUnixTimeMilliseconds(1722216724217);
-		_ = fakeTimeProvider.GetUtcNow().Returns(timeProvider);
+		_ = fakeSystemClock.UtcNow.Returns(timeProvider);
 
 		var token = Guid.NewGuid().ToString("N");
 		_ = fakeTokenUtensil.GetTokenAsync(
@@ -230,65 +230,64 @@ public class GameApiClient_ALLWagerUnitTest
 			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
 		var httpClient = handler.ToHttpClient();
 
-		var decrypt = JsonNode.Parse("""
-			{
-				"agname": "RT706test1",
-				"wager_cashout": [],
-				"method": "ALLWager",
-				"responeid": "22684385659",
-				"page": "1",
-				"agid": "3238",
-				"wager_totalpage": "1",
-				"respcode": "0000",
-				"wager_data": [
-					{
-						"oddsFormat": "0.5 / 1",
-						"strong": "C",
-						"gtype": "FT",
-						"degold": "2.000",
-						"settle": "1",
-						"mid": "28831508",
-						"wingold_d": "0.95",
-						"orderdate": "2024-07-26",
-						"wingold": "1.00",
-						"gold": "2.000",
-						"result": "L",
-						"rtype": "Running Ball-Home",
-						"score": "0:0",
-						"tname_home": "Real Murcia",
-						"gold_d": "1.91",
-						"cashoutid": "0",
-						"odds": "H",
-						"wtypecode": "RE",
-						"currency": "HKD",
-						"degold_d": "1.910",
-						"id": "438050329",
-						"adddate": "2024-07-26 04:31:51",
-						"order": "Real Murcia",
-						"cashout_d": "0.000",
-						"tname_away": "Millwall",
-						"handicap": "2",
-						"pname": "",
-						"IP": "185.196.0.16",
-						"league": "Club Friendlies",
-						"ioratio": "1.04",
-						"rtypecode": "REH",
-						"members_vgold": "1",
-						"ordertime": "04:30:00",
-						"cashout": "0.000",
-						"report_test": "",
-						"wtype": "Running Ball",
-						"resultdetail": "LL",
-						"vgold": "0.96",
-						"resultdate": "2024-07-26 06:19:25",
-						"result_score": "1:2",
-						"username": "4uf6k014jp5x"
+		var decrypt = new JsonObject
+		{
+			["agname"] = "RT706test1",
+			["wager_cashout"] = new JsonArray { },
+			["method"] = "ALLWager",
+			["responeid"] = "22684385659",
+			["page"] = "1",
+			["agid"] = "3238",
+			["wager_totalpage"] = "1",
+			["respcode"] = "0000",
+			["wager_data"] = new JsonArray {
+					new JsonObject{
+						["oddsFormat"]= "0.5 / 1",
+						["strong"]= "C",
+						["gtype"]= "FT",
+						["degold"]= "2.000",
+						["settle"]= "1",
+						["mid"]= "28831508",
+						["wingold_d"]= "0.95",
+						["orderdate"]= "2024-07-26",
+						["wingold"]= "1.00",
+						["gold"]= "2.000",
+						["result"]= "L",
+						["rtype"]= "Running Ball-Home",
+						["score"]= "0:0",
+						["tname_home"]= "Real Murcia",
+						["gold_d"]= "1.91",
+						["cashoutid"]= "0",
+						["odds"]= "H",
+						["wtypecode"]= "RE",
+						["currency"]= "HKD",
+						["degold_d"]= "1.910",
+						["id"]= "438050329",
+						["adddate"]= "2024-07-26 04:31:51",
+						["order"]= "Real Murcia",
+						["cashout_d"]= "0.000",
+						["tname_away"]= "Millwall",
+						["handicap"]= "2",
+						["pname"]= "",
+						["IP"]= "185.196.0.16",
+						["league"]= "Club Friendlies",
+						["ioratio"]= "1.04",
+						["rtypecode"]= "REH",
+						["members_vgold"]= "1",
+						["ordertime"]= "04:30:00",
+						["cashout"]= "0.000",
+						["report_test"]= "",
+						["wtype"]= "Running Ball",
+						["resultdetail"]= "LL",
+						["vgold"]= "0.96",
+						["resultdate"]= "2024-07-26 06:19:25",
+						["result_score"]= "1:2",
+						["username"]= "4uf6k014jp5x"
 					}
-				],
-				"status": "success",
-				"timestamp": "1722216724217"
-			}
-			""");
+				},
+			["status"] = "success",
+			["timestamp"] = "1722216724217"
+		};
 		_ = fakeCryptographyUtensil.Decrypt(
 			Arg.Is(responseContent),
 			Arg.Is(secretKey))
@@ -299,7 +298,7 @@ public class GameApiClient_ALLWagerUnitTest
 			fakerLogger,
 			fakePolicySettingsOptions,
 			fakeGameInterfaceOptions,
-			fakeTimeProvider,
+			fakeSystemClock,
 			dateTimeConverter,
 			fakeTokenUtensil,
 			fakeCryptographyUtensil,
@@ -345,7 +344,7 @@ public class GameApiClient_ALLWagerUnitTest
 		{
 			PlayerPassword = "TgsPassw0rd"
 		});
-		var fakeTimeProvider = Substitute.For<TimeProvider>();
+		var fakeSystemClock = Substitute.For<ISystemClock>();
 		var dateTimeConverter = new DateTimeConverter();
 		var fakeTokenUtensil = Substitute.For<ITokenUtensil>();
 		var fakeCryptographyUtensil = Substitute.For<ICryptographyUtensil>();
@@ -361,7 +360,7 @@ public class GameApiClient_ALLWagerUnitTest
 		var page = 1;
 
 		var timeProvider = DateTimeOffset.FromUnixTimeMilliseconds(1721985116406);
-		_ = fakeTimeProvider.GetUtcNow().Returns(timeProvider);
+		_ = fakeSystemClock.UtcNow.Returns(timeProvider);
 
 		var token = Guid.NewGuid().ToString("N");
 		_ = fakeTokenUtensil.GetTokenAsync(
@@ -393,14 +392,13 @@ public class GameApiClient_ALLWagerUnitTest
 			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
 		var httpClient = handler.ToHttpClient();
 
-		var decrypt = JsonNode.Parse("""
-			{
-				"Error": "can not ALLWager: no data for search",
-				"responeid": "20837820712",
-				"respcode": "0003",
-				"timestamp": "1721985117325"
-			}
-			""");
+		var decrypt = new JsonObject
+		{
+			["Error"] = "can not ALLWager: no data for search",
+			["responeid"] = "20837820712",
+			["respcode"] = "0003",
+			["timestamp"] = "1721985117325"
+		};
 		_ = fakeCryptographyUtensil.Decrypt(
 			Arg.Is(responseContent),
 			Arg.Is(secretKey))
@@ -411,7 +409,7 @@ public class GameApiClient_ALLWagerUnitTest
 			fakerLogger,
 			fakePolicySettingsOptions,
 			fakeGameInterfaceOptions,
-			fakeTimeProvider,
+			fakeSystemClock,
 			dateTimeConverter,
 			fakeTokenUtensil,
 			fakeCryptographyUtensil,

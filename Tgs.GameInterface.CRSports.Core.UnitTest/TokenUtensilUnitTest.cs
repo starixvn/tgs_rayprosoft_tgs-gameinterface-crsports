@@ -23,7 +23,7 @@ public class TokenUtensilUnitTest
 
 		var fakeDatabase = Substitute.For<IDatabase>();
 		var expiry = TimeSpan.FromSeconds(1);
-		var fakeMessageSender = Substitute.For<IMessageSender>();
+		var fakeAGLoginApiClient = Substitute.For<IAGLoginApiClient>();
 
 		var apiUrl = new Uri("https://api.orb-6789.com/");
 		var agentId = 3238;
@@ -45,7 +45,7 @@ public class TokenUtensilUnitTest
 		var sut = new TokenUtensil(
 			fakeDatabase,
 			expiry,
-			fakeMessageSender);
+			fakeAGLoginApiClient);
 
 		var actual = await sut.GetTokenAsync(
 			 apiUrl: apiUrl,
@@ -66,7 +66,7 @@ public class TokenUtensilUnitTest
 
 		var fakeDatabase = Substitute.For<IDatabase>();
 		var expiry = TimeSpan.FromSeconds(1);
-		var fakeMessageSender = Substitute.For<IMessageSender>();
+		var fakeAGLoginApiClient = Substitute.For<IAGLoginApiClient>();
 
 		var apiUrl = new Uri("https://api.orb-6789.com/");
 		var agentId = 3238;
@@ -82,26 +82,19 @@ public class TokenUtensilUnitTest
 
 		var token = Guid.NewGuid().ToString();
 
-		_ = fakeMessageSender.RequestAsync<AGLoginRequest, AGLoginReply>(
-			subject: Arg.Is("gp.gameinterface.cr.aglogin"),
-			data: Arg.Is(new AGLoginRequest
-			{
-				ApiUrl = apiUrl.ToString(),
-				AgentId = agentId,
-				SecretKey = secretKey,
-				AgentAccount = agentAccount,
-				AgentPassword = agentPassword
-			}),
+		_ = fakeAGLoginApiClient.AGLoginAsync(
+			apiUrl: Arg.Is(apiUrl),
+			agentId: Arg.Is(agentId),
+			secretKey: Arg.Is(secretKey),
+			agentAccount: Arg.Is(agentAccount),
+			agentPassword: Arg.Is(agentPassword),
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(new AGLoginReply
-			{
-				Token = token
-			});
+			.Returns(token);
 
 		var sut = new TokenUtensil(
 			fakeDatabase,
 			expiry,
-			fakeMessageSender);
+			fakeAGLoginApiClient);
 
 		var actual = await sut.GetTokenAsync(
 			 apiUrl: apiUrl,
@@ -134,7 +127,7 @@ public class TokenUtensilUnitTest
 
 		var fakeDatabase = Substitute.For<IDatabase>();
 		var expiry = TimeSpan.FromSeconds(1);
-		var fakeMessageSender = Substitute.For<IMessageSender>();
+		var fakeAGLoginApiClient = Substitute.For<IAGLoginApiClient>();
 
 		var apiUrl = new Uri("https://api.orb-6789.com/");
 		var agentId = 3238;
@@ -142,7 +135,7 @@ public class TokenUtensilUnitTest
 		var sut = new TokenUtensil(
 			fakeDatabase,
 			expiry,
-			fakeMessageSender);
+			fakeAGLoginApiClient);
 
 		await sut.DeleteTokenAsync(
 			apiUrl: apiUrl,

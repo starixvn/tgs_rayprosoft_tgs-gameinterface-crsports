@@ -4,8 +4,6 @@ namespace Tgs.GameInterface.CRSports.Core;
 
 public interface IGameApiClient
 {
-	public ValueTask<string> AGLoginAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, CancellationToken cancellationToken);
-
 	public ValueTask CreateMemberAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string memname, string currency, CancellationToken cancellationToken);
 
 	public ValueTask<ChkMemberBalanceResp> ChkMemberBalanceAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string memname, CancellationToken cancellationToken);

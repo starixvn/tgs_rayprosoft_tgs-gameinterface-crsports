@@ -2,10 +2,18 @@
 
 namespace Tgs.GameInterface.CRSports.Core.ApplicationServices;
 
-internal class PlayerCreateCommandService(IGameApiClient apiClient) : ICommandService<PlayerCreateCommand>
+internal class PlayerCreateCommandService : ICommandService<PlayerCreateCommand>
 {
+	private readonly IGameApiClient _client;
+
+	public PlayerCreateCommandService(
+		IGameApiClient client)
+	{
+		_client = client ?? throw new ArgumentNullException(nameof(client));
+	}
+
 	public ValueTask ExecuteAsync(PlayerCreateCommand command, CancellationToken cancellationToken = default)
-		=> apiClient.CreateMemberAsync(
+		=> _client.CreateMemberAsync(
 			apiUrl: command.ApiUrl,
 			agentId: command.AgentId,
 			secretKey: command.SecretKey,

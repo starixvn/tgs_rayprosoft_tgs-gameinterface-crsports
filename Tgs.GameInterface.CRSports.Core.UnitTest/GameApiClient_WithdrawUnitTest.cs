@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Text.Json.Nodes;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -21,7 +22,7 @@ public class GameApiClient_WithdrawUnitTest
 		{
 			PlayerPassword = "TgsPassw0rd"
 		});
-		var fakeTimeProvider = Substitute.For<TimeProvider>();
+		var fakeSystemClock = Substitute.For<ISystemClock>();
 		var dateTimeConverter = new DateTimeConverter();
 		var fakeTokenUtensil = Substitute.For<ITokenUtensil>();
 		var fakeCryptographyUtensil = Substitute.For<ICryptographyUtensil>();
@@ -36,7 +37,7 @@ public class GameApiClient_WithdrawUnitTest
 		var amount = 10.00m;
 
 		var timeProvider = DateTimeOffset.FromUnixTimeMilliseconds(1721976666753);
-		_ = fakeTimeProvider.GetUtcNow().Returns(timeProvider);
+		_ = fakeSystemClock.UtcNow.Returns(timeProvider);
 
 		var token = Guid.NewGuid().ToString("N");
 		_ = fakeTokenUtensil.GetTokenAsync(
@@ -67,24 +68,24 @@ public class GameApiClient_WithdrawUnitTest
 			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
 		var httpClient = handler.ToHttpClient();
 
-		var decrypt = JsonNode.Parse("""
+		var decrypt = new JsonObject
+		{
+			["method"] = "Withdraw",
+			["responeid"] = "22681727334",
+			["respcode"] = "0000",
+			["moneydata"] = new JsonObject
 			{
-				"method": "Withdraw",
-				"responeid": "22681727334",
-				"respcode": "0000",
-				"moneydata": {
-					"gold": "189.0",
-					"payno": "29CDE229-AE62-49BA-B03B-2EB7288C0058",
-					"pay_gold": "10.0",
-					"currency": "HKD",
-					"pay_way": "-1",
-					"recid": "264552615",
-					"username": "4uf6k014jp5x"
-				},
-				"status": "success",
-				"timestamp": "1721979994842"
-			}
-			""");
+				["gold"] = "189.0",
+				["payno"] = "29CDE229-AE62-49BA-B03B-2EB7288C0058",
+				["pay_gold"] = "10.0",
+				["currency"] = "HKD",
+				["pay_way"] = "-1",
+				["recid"] = "264552615",
+				["username"] = "4uf6k014jp5x"
+			},
+			["status"] = "success",
+			["timestamp"] = "1721979994842"
+		};
 		_ = fakeCryptographyUtensil.Decrypt(
 			Arg.Is(responseContent),
 			Arg.Is(secretKey))
@@ -95,7 +96,7 @@ public class GameApiClient_WithdrawUnitTest
 			fakerLogger,
 			fakePolicySettingsOptions,
 			fakeGameInterfaceOptions,
-			fakeTimeProvider,
+			fakeSystemClock,
 			dateTimeConverter,
 			fakeTokenUtensil,
 			fakeCryptographyUtensil,

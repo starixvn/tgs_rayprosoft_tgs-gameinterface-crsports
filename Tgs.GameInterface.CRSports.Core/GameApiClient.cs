@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics;
-using System.Net;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Polly;
@@ -13,48 +13,43 @@ using Tgs.GameInterface.CRSports.Core.Models;
 
 namespace Tgs.GameInterface.CRSports.Core;
 
-internal class GameApiClient(
+internal class GameApiClient : IGameApiClient
+{
+	private readonly GameInterfaceSettingsOptions _gameInterfaceOptions;
+	private readonly PolicySettingsOptions _policySettingsOptions;
+	private readonly ILogger<GameApiClient> _logger;
+	private readonly ISystemClock _systemClock;
+	private readonly DateTimeConverter _dateTimeConverter;
+	private readonly ITokenUtensil _tokenUtensil;
+	private readonly ICryptographyUtensil _cryptographyUtensil;
+	private readonly HttpClient _httpClient;
+
+	public GameApiClient(
 	ILogger<GameApiClient> logger,
 	IOptions<PolicySettingsOptions> policySettingsOptions,
 	IOptions<GameInterfaceSettingsOptions> gameInterfaceOptions,
-	TimeProvider timeProvider,
+	ISystemClock systemClock,
 	DateTimeConverter dateTimeConverter,
 	ITokenUtensil tokenUtensil,
 	ICryptographyUtensil cryptographyUtensil,
-	HttpClient httpClient) : IGameApiClient
-{
-	private readonly GameInterfaceSettingsOptions _gameInterfaceOptions = gameInterfaceOptions.Value;
-	private readonly PolicySettingsOptions _policySettingsOptions = policySettingsOptions.Value;
-
-	public async ValueTask<string> AGLoginAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, CancellationToken cancellationToken)
+	HttpClient httpClient)
 	{
-		var parameters = new JsonObject
-		{
-			["username"] = agentAccount,
-			["password"] = agentPassword
-		};
-
-		apiUrl = new Uri(apiUrl, "/app/control_API/agents/api_doaction.php");
-
-		var jsonNode = await PostAsync(
-			apiUrl: apiUrl,
-			agentId: agentId,
-			secretKey: secretKey,
-			method: "AGLogin",
-			parameters: parameters,
-			logPrefix: nameof(AGLoginAsync).ToString(),
-			cancellationToken: cancellationToken)
-			.ConfigureAwait(false);
-
-		return !string.Equals(jsonNode["respcode"]!.ToString(), "0000") ? throw new GameInterfaceException(jsonNode["respcode"]!.ToString()) : jsonNode["token"]!.GetValue<string>();
+		_logger = logger;
+		_systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
+		_dateTimeConverter = dateTimeConverter;
+		_tokenUtensil = tokenUtensil;
+		_cryptographyUtensil = cryptographyUtensil;
+		_httpClient = httpClient;
+		_policySettingsOptions = policySettingsOptions.Value;
+		_gameInterfaceOptions = gameInterfaceOptions.Value;
 	}
 
 	public async IAsyncEnumerable<WagerDataResp> ALLWagerAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, DateTimeOffset dateStart, DateTimeOffset dateEnd, int settle, int page, [EnumeratorCancellation] CancellationToken cancellationToken)
 	{
 		var parameters = new JsonObject
 		{
-			["dateStart"] = dateTimeConverter.DatetimeConvertToString(dateStart),
-			["dateEnd"] = dateTimeConverter.DatetimeConvertToString(dateEnd),
+			["dateStart"] = _dateTimeConverter.DatetimeConvertToString(dateStart),
+			["dateEnd"] = _dateTimeConverter.DatetimeConvertToString(dateEnd),
 			["page"] = page,
 			["settle"] = settle,
 			["langx"] = "en-us"
@@ -93,8 +88,8 @@ internal class GameApiClient(
 					 Id: wagerdata["id"]!.GetValue<string>(),
 					 Username: wagerdata["username"]!.GetValue<string>(),
 					 Gtype: wagerdata["gtype"]!.GetValue<string>(),
-					 Adddate: dateTimeConverter.StringConvertToDatetime(wagerdata["adddate"]!.GetValue<string>()),
-					 Resultdate: !string.IsNullOrEmpty(resultdate) ? dateTimeConverter.StringConvertToDatetime(resultdate) : DateTimeOffset.UnixEpoch,
+					 Adddate: _dateTimeConverter.StringConvertToDatetime(wagerdata["adddate"]!.GetValue<string>()),
+					 Resultdate: !string.IsNullOrEmpty(resultdate) ? _dateTimeConverter.StringConvertToDatetime(resultdate) : DateTimeOffset.UnixEpoch,
 					 Settle: wagerdata["settle"]!.GetValue<string>(),
 					 Result: wagerdata["result"]!.GetValue<string>(),
 					 Gold: decimal.Parse(wagerdata["gold"]!.GetValue<string>()),
@@ -369,7 +364,7 @@ internal class GameApiClient(
 
 	private async ValueTask<JsonNode> TokenAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string method, JsonNode parameters, string logPrefix, CancellationToken cancellationToken = default)
 	{
-		var token = await tokenUtensil.GetTokenAsync(
+		var token = await _tokenUtensil.GetTokenAsync(
 			apiUrl: apiUrl,
 			agentId: agentId,
 			secretKey: secretKey,
@@ -386,7 +381,7 @@ internal class GameApiClient(
 					retryAttempt => TimeSpan.FromSeconds(Math.Pow(_policySettingsOptions.GlobalRetryWaitSec, retryAttempt)),
 					onRetry: async (response, retryTime, retryCount, context) =>
 					{
-						logger.LogWarning("{LogWarning}",
+						_logger.LogWarning("{LogWarning}",
 						new
 						{
 							LogOn = DateTime.Now.ToString("u"),
@@ -394,8 +389,8 @@ internal class GameApiClient(
 							RetryCount = retryCount,
 							Response = response
 						});
-						await tokenUtensil.DeleteTokenAsync(apiUrl, agentId, cancellationToken).ConfigureAwait(false);
-						token = await tokenUtensil.GetTokenAsync(
+						await _tokenUtensil.DeleteTokenAsync(apiUrl, agentId, cancellationToken).ConfigureAwait(false);
+						token = await _tokenUtensil.GetTokenAsync(
 							apiUrl: apiUrl,
 							agentId: agentId,
 							secretKey: secretKey,
@@ -419,8 +414,8 @@ internal class GameApiClient(
 
 	private async ValueTask<JsonNode> PostAsync(Uri apiUrl, int agentId, string secretKey, string method, JsonNode parameters, string logPrefix, CancellationToken cancellationToken = default)
 	{
-		parameters["timestamp"] = timeProvider.GetUtcNow().ToUnixTimeMilliseconds().ToString();
-		var request = cryptographyUtensil.Encrypt(parameters, secretKey);
+		parameters["timestamp"] = _systemClock.UtcNow.ToUnixTimeMilliseconds().ToString();
+		var request = _cryptographyUtensil.Encrypt(parameters, secretKey);
 		var jsonContent = JsonContent.Create(
 			inputValue: new
 			{
@@ -436,7 +431,7 @@ internal class GameApiClient(
 
 		var sw = Stopwatch.StartNew();
 
-		var httpResponseMessage = await httpClient.PostAsync(
+		var httpResponseMessage = await _httpClient.PostAsync(
 			requestUri: apiUrl,
 			content: jsonContent,
 			cancellationToken: cancellationToken)
@@ -448,16 +443,14 @@ internal class GameApiClient(
 
 		using (var sr = new StreamReader(httpResponseMessage.Content.ReadAsStreamAsync(cancellationToken).Result))
 		{
-			responseMessage = await sr.ReadToEndAsync(
-				cancellationToken: cancellationToken)
-				.ConfigureAwait(false) ?? string.Empty;
+			responseMessage = await sr.ReadToEndAsync().ConfigureAwait(false) ?? string.Empty;
 		}
 
 		JsonNode? jsonNode;
 
 		try
 		{
-			jsonNode = cryptographyUtensil.Decrypt(responseMessage, secretKey);
+			jsonNode = _cryptographyUtensil.Decrypt(responseMessage, secretKey);
 
 			jsonNode ??= JsonNode.Parse(responseMessage);
 		}
@@ -482,7 +475,7 @@ internal class GameApiClient(
 			ExecutionTimeMs = (int)sw.ElapsedMilliseconds,
 			RecordedOn = DateTimeOffset.UtcNow
 		};
-		logger.LogInformation("{apiLogEvent}", JsonSerializer.Serialize(apiLogEvent));
+		_logger.LogInformation("{apiLogEvent}", JsonSerializer.Serialize(apiLogEvent));
 
 		httpResponseMessage.EnsureSuccessStatusCode();
 

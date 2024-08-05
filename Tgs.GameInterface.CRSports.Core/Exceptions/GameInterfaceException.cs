@@ -1,7 +1,11 @@
 ﻿namespace Tgs.GameInterface.CRSports.Core.Exceptions;
 
-public sealed class GameInterfaceException(string respcode) : Exception(string.Concat(ConvertErrorMesaage(respcode), $"({respcode})"))
+public sealed class GameInterfaceException : Exception
 {
+	public GameInterfaceException(string respcode) : base(string.Concat(ConvertErrorMesaage(respcode), $"({respcode})"))
+	{
+	}
+
 	private static string ConvertErrorMesaage(string respcode) => respcode switch
 	{
 		"0000" => "成功",

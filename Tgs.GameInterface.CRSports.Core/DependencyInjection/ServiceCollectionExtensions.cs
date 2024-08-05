@@ -1,7 +1,5 @@
-﻿using System.Net;
-using System.Net.Security;
-using System.Reflection;
-using System.Security.Authentication;
+﻿using System.Reflection;
+using Microsoft.AspNetCore.Authentication;
 using StackExchange.Redis;
 using Tgs.GameInterface.CRSports.Core;
 
@@ -17,17 +15,30 @@ public static class ServiceCollectionExtensions
 			Assembly.GetExecutingAssembly(),
 			ServiceLifetime.Transient)
 		.AddHttpClient<IGameApiClient, GameApiClient>()
-
-		.ConfigurePrimaryHttpMessageHandler(sp =>
+		/*.ConfigurePrimaryHttpMessageHandler(sp =>
 		{
-			var handler = new HttpClientHandler();
-			handler.SslProtocols = SslProtocols.Ssl3 | SslProtocols.Ssl2 | SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls;
-			handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-			handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+			var handler = new HttpClientHandler
+			{
+				SslProtocols = SslProtocols.Ssl3 | SslProtocols.Ssl2 | SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls,
+				ClientCertificateOptions = ClientCertificateOption.Manual,
+				ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+			};
 			return handler;
-		})
+		})*/
 		.Services
-		.AddSingleton(TimeProvider.System)
+		.AddHttpClient<IAGLoginApiClient, AGLoginApiClient>()
+		/*.ConfigurePrimaryHttpMessageHandler(sp =>
+		{
+			var handler = new HttpClientHandler
+			{
+				SslProtocols = SslProtocols.Ssl3 | SslProtocols.Ssl2 | SslProtocols.Tls12 | SslProtocols.Tls11 | SslProtocols.Tls,
+				ClientCertificateOptions = ClientCertificateOption.Manual,
+				ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+			};
+			return handler;
+		})*/
+		.Services
+		.AddSingleton<ISystemClock, SystemClock>()
 		.AddSingleton<DateTimeConverter>()
 		.AddSingleton<ICryptographyUtensil, CryptographyUtensil>()
 		.AddSingleton<ITokenUtensil>((sp) => ActivatorUtilities.CreateInstance<TokenUtensil>(sp, redisDatabaseResolver(sp), TimeSpan.FromMinutes(10)));

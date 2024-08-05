@@ -1,32 +1,21 @@
 ﻿using System.Net;
+using System.Net.Http.Json;
 using System.Text.Json.Nodes;
+using Microsoft.AspNetCore.Authentication;
+
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using RichardSzalay.MockHttp;
-using Microsoft.Extensions.Options;
 using Tgs.GameInterface.CRSports.Core.Exceptions;
-using System.Net.Http.Json;
-using Tgs.GameInterface.CRSports.Core;
 
 namespace Tgs.GameInterface.CRSports.Core.UnitTest;
 
-public class GameApiClient_AGLoginUnitTest
+public class AGLoginApiClient_AGLoginUnitTest
 {
 	[Fact]
 	public async Task Normal_Process()
 	{
-		var fakePolicySettingsOptions = Options.Create(new PolicySettingsOptions
-		{
-			GlobalRetryCount = 1,
-			GlobalRetryWaitSec = 1,
-		});
-		var fakeGameInterfaceOptions = Options.Create(new GameInterfaceSettingsOptions
-		{
-			PlayerPassword = "TgsPassw0rd"
-		});
-		var fakeTimeProvider = Substitute.For<TimeProvider>();
-		var dateTimeConverter = new DateTimeConverter();
-		var fakeTokenUtensil = Substitute.For<ITokenUtensil>();
+		var fakeSystemClock = Substitute.For<ISystemClock>();
 		var fakeCryptographyUtensil = Substitute.For<ICryptographyUtensil>();
 
 		var apiUrl = new Uri("https://api.orb-6789.com/");
@@ -36,17 +25,7 @@ public class GameApiClient_AGLoginUnitTest
 		var agentPassword = "aaa123";
 
 		var timeProvider = DateTimeOffset.FromUnixTimeMilliseconds(1721971001210);
-		_ = fakeTimeProvider.GetUtcNow().Returns(timeProvider);
-
-		var token = Guid.NewGuid().ToString("N");
-		_ = fakeTokenUtensil.GetTokenAsync(
-			apiUrl: Arg.Is(apiUrl),
-			agentId: Arg.Is(agentId),
-			secretKey: Arg.Is(secretKey),
-			agentAccount: Arg.Is(agentAccount),
-			agentPassword: Arg.Is(agentPassword),
-			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(token);
+		_ = fakeSystemClock.UtcNow.Returns(timeProvider);
 
 		var encrypt = Guid.NewGuid().ToString("N");
 		_ = fakeCryptographyUtensil.Encrypt(
@@ -65,31 +44,26 @@ public class GameApiClient_AGLoginUnitTest
 			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
 		var httpClient = handler.ToHttpClient();
 
-		var decrypt = JsonNode.Parse("""
-			{
-				"method": "AGLogin",
-				"responeid": "18837756570",
-				"respcode": "0000",
-				"aid": "3238",
-				"username": "RT706test1",
-				"token": "2bb12b1am1bdeld343a2xw",
-				"status": "success",
-				"timestamp": "1721981249639"
-			}
-			""");
+		var decrypt = new JsonObject
+		{
+			["method"] = "AGLogin",
+			["responeid"] = "18837756570",
+			["respcode"] = "0000",
+			["aid"] = "3238",
+			["username"] = "RT706test1",
+			["token"] = "2bb12b1am1bdeld343a2xw",
+			["status"] = "success",
+			["timestamp"] = "1721981249639"
+		};
 		_ = fakeCryptographyUtensil.Decrypt(
 			Arg.Is(responseContent),
 			Arg.Is(secretKey))
 			.Returns(decrypt);
 
-		var fakerLogger = NullLogger<GameApiClient>.Instance;
-		var apiClient = new GameApiClient(
+		var fakerLogger = NullLogger<AGLoginApiClient>.Instance;
+		var apiClient = new AGLoginApiClient(
 			fakerLogger,
-			fakePolicySettingsOptions,
-			fakeGameInterfaceOptions,
-			fakeTimeProvider,
-			dateTimeConverter,
-			fakeTokenUtensil,
+			fakeSystemClock,
 			fakeCryptographyUtensil,
 			httpClient);
 
@@ -109,18 +83,7 @@ public class GameApiClient_AGLoginUnitTest
 	[Fact]
 	public async Task We_are_currently_undergoing_system_maintenance()
 	{
-		var fakePolicySettingsOptions = Options.Create(new PolicySettingsOptions
-		{
-			GlobalRetryCount = 1,
-			GlobalRetryWaitSec = 1,
-		});
-		var fakeGameInterfaceOptions = Options.Create(new GameInterfaceSettingsOptions
-		{
-			PlayerPassword = "TgsPassw0rd"
-		});
-		var fakeTimeProvider = Substitute.For<TimeProvider>();
-		var dateTimeConverter = new DateTimeConverter();
-		var fakeTokenUtensil = Substitute.For<ITokenUtensil>();
+		var fakeSystemClock = Substitute.For<ISystemClock>();
 		var fakeCryptographyUtensil = Substitute.For<ICryptographyUtensil>();
 
 		var apiUrl = new Uri("https://api.orb-6789.com/");
@@ -130,7 +93,7 @@ public class GameApiClient_AGLoginUnitTest
 		var agentPassword = "aaa123";
 
 		var timeProvider = DateTimeOffset.FromUnixTimeMilliseconds(1721974886257);
-		_ = fakeTimeProvider.GetUtcNow().Returns(timeProvider);
+		_ = fakeSystemClock.UtcNow.Returns(timeProvider);
 
 		var encrypt = Guid.NewGuid().ToString("N");
 		_ = fakeCryptographyUtensil.Encrypt(
@@ -146,23 +109,18 @@ public class GameApiClient_AGLoginUnitTest
 				content["Request"]!.GetValue<string>() == encrypt &&
 				content["Method"]!.GetValue<string>() == "AGLogin" &&
 				content["AGID"]!.GetValue<string>() == agentId.ToString())
-			.Respond(HttpStatusCode.OK, JsonContent.Create(JsonNode.Parse("""
+			.Respond(HttpStatusCode.OK, JsonContent.Create(new JsonObject
 			{
-				"Error": "We are currently undergoing system maintenance.",
-				"respcode": "0016",
-				"timestamp": "1721974886257"
-			}
-			""")));
+				["Error"] = "We are currently undergoing system maintenance.",
+				["respcode"] = "0016",
+				["timestamp"] = "1721974886257"
+			}));
 		var httpClient = handler.ToHttpClient();
 
-		var fakerLogger = NullLogger<GameApiClient>.Instance;
-		var apiClient = new GameApiClient(
+		var fakerLogger = NullLogger<AGLoginApiClient>.Instance;
+		var apiClient = new AGLoginApiClient(
 			fakerLogger,
-			fakePolicySettingsOptions,
-			fakeGameInterfaceOptions,
-			fakeTimeProvider,
-			dateTimeConverter,
-			fakeTokenUtensil,
+			fakeSystemClock,
 			fakeCryptographyUtensil,
 			httpClient);
 
@@ -176,15 +134,5 @@ public class GameApiClient_AGLoginUnitTest
 				cancellationToken: default)
 			.AsTask())
 			.ConfigureAwait(true);
-
-		_ = fakeTokenUtensil
-			.Received(0)
-			.GetTokenAsync(
-			apiUrl: Arg.Is(apiUrl),
-			agentId: Arg.Is(agentId),
-			secretKey: Arg.Is(secretKey),
-			agentAccount: Arg.Is(agentAccount),
-			agentPassword: Arg.Is(agentPassword),
-			cancellationToken: Arg.Any<CancellationToken>());
 	}
 }

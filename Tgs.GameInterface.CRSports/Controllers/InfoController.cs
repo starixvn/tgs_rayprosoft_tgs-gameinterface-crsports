@@ -10,7 +10,7 @@ namespace Tgs.GameInterface.CRSports.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class InfoController() : ControllerBase
+public class InfoController : ControllerBase
 {
 	/// <summary>
 	/// Gets the asynchronous.

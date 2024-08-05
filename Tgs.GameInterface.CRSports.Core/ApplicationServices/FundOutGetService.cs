@@ -2,11 +2,19 @@
 
 namespace Tgs.GameInterface.CRSports.Core.ApplicationServices;
 
-internal class FundOutGetService(IGameApiClient apiClient) : IGetService<FundOutQuery, FundResult>
+internal class FundOutGetService : IGetService<FundOutQuery, FundResult>
 {
+	private readonly IGameApiClient _client;
+
+	public FundOutGetService(
+		IGameApiClient client)
+	{
+		_client = client ?? throw new ArgumentNullException(nameof(client));
+	}
+
 	public async ValueTask<FundResult> GetAsync(FundOutQuery query, CancellationToken cancellationToken = default)
 	{
-		var resp = await apiClient.DepositAsync(
+		var resp = await _client.DepositAsync(
 			apiUrl: query.ApiUrl,
 			agentId: query.AgentId,
 			secretKey: query.SecretKey,

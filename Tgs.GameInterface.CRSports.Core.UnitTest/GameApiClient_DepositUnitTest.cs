@@ -1,10 +1,10 @@
 ﻿using System.Net;
 using System.Text.Json.Nodes;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using RichardSzalay.MockHttp;
-using Tgs.GameInterface.CRSports.Core;
 
 namespace Tgs.GameInterface.CRSports.Core.UnitTest;
 
@@ -22,7 +22,7 @@ public class GameApiClient_DepositUnitTest
 		{
 			PlayerPassword = "TgsPassw0rd"
 		});
-		var fakeTimeProvider = Substitute.For<TimeProvider>();
+		var fakeSystemClock = Substitute.For<ISystemClock>();
 		var dateTimeConverter = new DateTimeConverter();
 		var fakeTokenUtensil = Substitute.For<ITokenUtensil>();
 		var fakeCryptographyUtensil = Substitute.For<ICryptographyUtensil>();
@@ -37,7 +37,7 @@ public class GameApiClient_DepositUnitTest
 		var amount = 99.00m;
 
 		var timeProvider = DateTimeOffset.FromUnixTimeMilliseconds(1721976666753);
-		_ = fakeTimeProvider.GetUtcNow().Returns(timeProvider);
+		_ = fakeSystemClock.UtcNow.Returns(timeProvider);
 
 		var token = Guid.NewGuid().ToString("N");
 		_ = fakeTokenUtensil.GetTokenAsync(
@@ -68,35 +68,35 @@ public class GameApiClient_DepositUnitTest
 			.Respond(HttpStatusCode.OK, new StringContent(responseContent));
 		var httpClient = handler.ToHttpClient();
 
-		var decrypt = JsonNode.Parse("""
+		var decrypt = new JsonObject
+		{
+			["method"] = "Deposit",
+			["responeid"] = "23681717965",
+			["respcode"] = "0000",
+			["moneydata"] = new JsonObject
 			{
-				"method": "Deposit",
-				"responeid": "23681717965",
-				"respcode": "0000",
-				"moneydata": {
-					"gold": "199.0",
-					"payno": "E366D434-F19E-4706-8FB9-96DFB21F2EF5",
-					"pay_gold": "99.0",
-					"currency": "HKD",
-					"pay_way": "1",
-					"recid": "264549283",
-					"username": "4uf6k014jp5x"
-				},
-				"status": "success",
-				"timestamp": "1721978380338"
-			}
-			""");
+				["gold"] = "199.0",
+				["payno"] = "E366D434-F19E-4706-8FB9-96DFB21F2EF5",
+				["pay_gold"] = "99.0",
+				["currency"] = "HKD",
+				["pay_way"] = "1",
+				["recid"] = "264549283",
+				["username"] = "4uf6k014jp5x"
+			},
+			["status"] = "success",
+			["timestamp"] = "1721978380338"
+		};
 		_ = fakeCryptographyUtensil.Decrypt(
 			Arg.Is(responseContent),
-			Arg.Is(secretKey))
-			.Returns(decrypt);
+				Arg.Is(secretKey))
+				.Returns(decrypt);
 
 		var fakerLogger = NullLogger<GameApiClient>.Instance;
 		var apiClient = new GameApiClient(
 			fakerLogger,
 			fakePolicySettingsOptions,
 			fakeGameInterfaceOptions,
-			fakeTimeProvider,
+			fakeSystemClock,
 			dateTimeConverter,
 			fakeTokenUtensil,
 			fakeCryptographyUtensil,
