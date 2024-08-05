@@ -24,24 +24,24 @@ public class GameInterfaceCRSportsClient_FundOutUnitTest
 		var result = new FundResult(
 			OrderId: "E366D434-F19E-4706-8FB9-96DFB21F2EF5",
 			ExternalOrderId: "264549283",
-			Resp: JsonNode.Parse("""
+			Resp: new JsonObject
 			{
-				"method": "Deposit",
-				"responeid": "23681717965",
-				"respcode": "0000",
-				"moneydata": {
-					"gold": "199.0",
-					"payno": "E366D434-F19E-4706-8FB9-96DFB21F2EF5",
-					"pay_gold": "99.0",
-					"currency": "HKD",
-					"pay_way": "1",
-					"recid": "264549283",
-					"username": "4uf6k014jp5x"
+				["method"] = "Deposit",
+				["responeid"] = "23681717965",
+				["respcode"] = "0000",
+				["moneydata"] = new JsonObject
+				{
+					["gold"] = "199.0",
+					["payno"] = "E366D434-F19E-4706-8FB9-96DFB21F2EF5",
+					["pay_gold"] = "99.0",
+					["currency"] = "HKD",
+					["pay_way"] = "1",
+					["recid"] = "264549283",
+					["username"] = "4uf6k014jp5x"
 				},
-				"status": "success",
-				"timestamp": "1721978380338"
-			}
-			""")!.ToJsonString());
+				["status"] = "success",
+				["timestamp"] = "1721978380338"
+			}.ToJsonString());
 
 		var web = new GameInterfaceCRSportsApplication(builder => _ = builder.ConfigureServices(services =>
 		{
