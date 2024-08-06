@@ -1,26 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Text.Json.Nodes;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
-using NSubstitute;
-using RichardSzalay.MockHttp;
+﻿using NSubstitute;
 using StackExchange.Redis;
-using Tgs.GameInterface.CRSports.Protos;
-using Valhalla.MessageQueue;
 
 namespace Tgs.GameInterface.CRSports.Core.UnitTest;
+
 public class TokenUtensilUnitTest
 {
 	[Fact]
 	public async Task KeyExists_Is_True()
 	{
-
 		var fakeDatabase = Substitute.For<IDatabase>();
 		var expiry = TimeSpan.FromSeconds(1);
 		var fakeAGLoginApiClient = Substitute.For<IAGLoginApiClient>();
@@ -63,7 +50,6 @@ public class TokenUtensilUnitTest
 	[Fact]
 	public async Task KeyExists_Is_False()
 	{
-
 		var fakeDatabase = Substitute.For<IDatabase>();
 		var expiry = TimeSpan.FromSeconds(1);
 		var fakeAGLoginApiClient = Substitute.For<IAGLoginApiClient>();
@@ -124,7 +110,6 @@ public class TokenUtensilUnitTest
 	[Fact]
 	public async Task Delete_Token()
 	{
-
 		var fakeDatabase = Substitute.For<IDatabase>();
 		var expiry = TimeSpan.FromSeconds(1);
 		var fakeAGLoginApiClient = Substitute.For<IAGLoginApiClient>();

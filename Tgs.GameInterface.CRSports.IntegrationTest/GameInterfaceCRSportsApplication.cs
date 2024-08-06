@@ -9,11 +9,8 @@ using Tgs.GameInterface.CRSports.Core;
 
 namespace Tgs.GameInterface.CRSports.IntegrationTest;
 
-internal class GameInterfaceCRSportsApplication : WebApplicationFactory<Program>
+internal class GameInterfaceCRSportsApplication(Action<IWebHostBuilder>? webHostConfigure = null) : WebApplicationFactory<Program>
 {
-	private readonly Action<IWebHostBuilder>? _webHostConfigure;
-
-	public GameInterfaceCRSportsApplication(Action<IWebHostBuilder>? webHostConfigure = null) => _webHostConfigure = webHostConfigure;
 	protected override void ConfigureWebHost(IWebHostBuilder builder)
 	{
 		_ = builder
@@ -45,6 +42,6 @@ internal class GameInterfaceCRSportsApplication : WebApplicationFactory<Program>
 					}))
 			*/
 			);
-		_webHostConfigure?.Invoke(builder);
+		webHostConfigure?.Invoke(builder);
 	}
 }

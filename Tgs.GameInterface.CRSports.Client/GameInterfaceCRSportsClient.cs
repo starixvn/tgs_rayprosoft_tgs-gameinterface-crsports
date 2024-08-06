@@ -1,30 +1,23 @@
-﻿using System.Net;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using Google.Protobuf.WellKnownTypes;
 using Tgs.GameInterface.CRSports.Protos;
 
 namespace Tgs.GameInterface.CRSports.Client;
 
-internal sealed class GameInterfaceCRSportsClient : IGameInterfaceCRSportsClient
+internal sealed class GameInterfaceCRSportsClient(
+	GameInterfaceCRSports.GameInterfaceCRSportsClient client) : IGameInterfaceCRSportsClient
 {
-	private readonly GameInterfaceCRSports.GameInterfaceCRSportsClient _client;
-
-	public GameInterfaceCRSportsClient(
-		GameInterfaceCRSports.GameInterfaceCRSportsClient client)
-	{
-		_client = client ?? throw new ArgumentNullException(nameof(client));
-	}
-
 	public async ValueTask<string> CheckingServiceAsync(string machineName, CancellationToken cancellationToken = default)
-		=> (await _client.CheckingServiceAsync(
+		=> (await client.CheckingServiceAsync(
 			request: new CheckingServiceRequest
 			{
 				MachineName = machineName,
 			},
 			cancellationToken: cancellationToken)
 		.ConfigureAwait(false)).MachineName;
+
 	public async ValueTask<FundReply> FundInAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string playerCode, string orderId, decimal amount, CancellationToken cancellationToken = default)
-		=> await _client.FundInAsync(
+		=> await client.FundInAsync(
 			request: new FundRequest
 			{
 				ApiUrl = apiUrl.ToString(),
@@ -38,8 +31,9 @@ internal sealed class GameInterfaceCRSportsClient : IGameInterfaceCRSportsClient
 			},
 			cancellationToken: cancellationToken)
 		.ConfigureAwait(false);
+
 	public async ValueTask<FundReply> FundOutAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string playerCode, string orderId, decimal amount, CancellationToken cancellationToken = default)
-		=> await _client.FundOutAsync(
+		=> await client.FundOutAsync(
 			request: new FundRequest
 			{
 				ApiUrl = apiUrl.ToString(),
@@ -53,8 +47,9 @@ internal sealed class GameInterfaceCRSportsClient : IGameInterfaceCRSportsClient
 			},
 			cancellationToken: cancellationToken)
 		.ConfigureAwait(false);
+
 	public async ValueTask<bool> FundStatusAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string playerCode, string orderId, CancellationToken cancellationToken = default)
-		=> (await _client.FundStatusAsync(
+		=> (await client.FundStatusAsync(
 			request: new FundStatusRequest
 			{
 				ApiUrl = apiUrl.ToString(),
@@ -67,9 +62,10 @@ internal sealed class GameInterfaceCRSportsClient : IGameInterfaceCRSportsClient
 			},
 			cancellationToken: cancellationToken)
 		.ConfigureAwait(false)).Status;
+
 	public async IAsyncEnumerable<GameRecordInfo> GameRecordBettingAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, DateTimeOffset startTime, DateTimeOffset endTime, int page = 1, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
-		var reply = await _client.GameRecordBettingAsync(
+		var reply = await client.GameRecordBettingAsync(
 			request: new GameRecordRequest
 			{
 				ApiUrl = apiUrl.ToString(),
@@ -87,9 +83,10 @@ internal sealed class GameInterfaceCRSportsClient : IGameInterfaceCRSportsClient
 		foreach (var info in reply.Items)
 			yield return info;
 	}
+
 	public async IAsyncEnumerable<GameRecordInfo> GameRecordSettleAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, DateTimeOffset startTime, DateTimeOffset endTime, int page = 1, [EnumeratorCancellation] CancellationToken cancellationToken = default)
 	{
-		var reply = await _client.GameRecordSettleAsync(
+		var reply = await client.GameRecordSettleAsync(
 			request: new GameRecordRequest
 			{
 				ApiUrl = apiUrl.ToString(),
@@ -107,8 +104,9 @@ internal sealed class GameInterfaceCRSportsClient : IGameInterfaceCRSportsClient
 		foreach (var info in reply.Items)
 			yield return info;
 	}
+
 	public async ValueTask<GameUrlReply> GameUrlAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string playerCode, string currency, string language, bool isMobile, string ipAddress, CancellationToken cancellationToken = default)
-		=> await _client.GameUrlAsync(
+		=> await client.GameUrlAsync(
 			request: new GameUrlRequest
 			{
 				ApiUrl = apiUrl.ToString(),
@@ -124,8 +122,9 @@ internal sealed class GameInterfaceCRSportsClient : IGameInterfaceCRSportsClient
 			},
 			cancellationToken: cancellationToken)
 		.ConfigureAwait(false);
+
 	public async ValueTask<PlayerBalanceReply> PlayerBalanceAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string playerCode, CancellationToken cancellationToken = default)
-		=> await _client.PlayerBalanceAsync(
+		=> await client.PlayerBalanceAsync(
 			request: new PlayerBalanceRequest
 			{
 				ApiUrl = apiUrl.ToString(),
@@ -137,8 +136,9 @@ internal sealed class GameInterfaceCRSportsClient : IGameInterfaceCRSportsClient
 			},
 			cancellationToken: cancellationToken)
 		.ConfigureAwait(false);
+
 	public async ValueTask PlayerCreateAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string playerCode, string currency, CancellationToken cancellationToken = default)
-		=> _ = await _client.PlayerCreateAsync(
+		=> _ = await client.PlayerCreateAsync(
 			request: new PlayerCreateRequest
 			{
 				ApiUrl = apiUrl.ToString(),
@@ -151,8 +151,9 @@ internal sealed class GameInterfaceCRSportsClient : IGameInterfaceCRSportsClient
 			},
 			cancellationToken: cancellationToken)
 		.ConfigureAwait(false);
+
 	public async ValueTask PlayerLogoutAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string playerCode, CancellationToken cancellationToken = default)
-		=> _ = await _client.PlayerLogoutAsync(
+		=> _ = await client.PlayerLogoutAsync(
 			request: new PlayerLogoutRequest
 			{
 				ApiUrl = apiUrl.ToString(),
@@ -164,8 +165,9 @@ internal sealed class GameInterfaceCRSportsClient : IGameInterfaceCRSportsClient
 			},
 			cancellationToken: cancellationToken)
 		.ConfigureAwait(false);
+
 	public async ValueTask<bool> PlayerOnlineAsync(Uri apiUrl, int agentId, string secretKey, string agentAccount, string agentPassword, string playerCode, CancellationToken cancellationToken = default)
-		=> (await _client.PlayerOnlineAsync(
+		=> (await client.PlayerOnlineAsync(
 			request: new PlayerOnlineRequest
 			{
 				ApiUrl = apiUrl.ToString(),
