@@ -10,3 +10,6 @@ dotnet_diagnostic.CA2012.severity = none
 
 # CA2007: 請考慮對等候的工作呼叫 ConfigureAwait
 dotnet_diagnostic.CA2007.severity = none
+
+# CS0618: 類型或成員已經過時
+dotnet_diagnostic.CS0618.severity = none
