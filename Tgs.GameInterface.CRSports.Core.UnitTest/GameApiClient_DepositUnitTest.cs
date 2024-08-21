@@ -53,7 +53,7 @@ public class GameApiClient_DepositUnitTest
 		_ = fakeCryptographyUtensil.Encrypt(
 			source: Arg.Is<JsonNode>(content => content["memname"]!.GetValue<string>() == memname &&
 				content["payno"]!.GetValue<string>() == payno &&
-				content["amount"]!.GetValue<decimal>() == amount &&
+				content["amount"]!.GetValue<string>() == amount.ToString() &&
 				content["token"]!.GetValue<string>() == token &&
 				content["timestamp"]!.GetValue<string>() == timeProvider.ToUnixTimeMilliseconds().ToString()),
 			Arg.Is(secretKey))

@@ -55,8 +55,8 @@ public class GameApiClient_ALLWagerUnitTest
 		_ = fakeCryptographyUtensil.Encrypt(
 			source: Arg.Is<JsonNode>(content => content["dateStart"]!.GetValue<string>() == "2024-07-26 04:30:00" &&
 				content["dateEnd"]!.GetValue<string>() == "2024-07-26 05:00:00" &&
-				content["settle"]!.GetValue<int>() == 0 &&
-				content["page"]!.GetValue<int>() == 1 &&
+				content["settle"]!.GetValue<string>() == "0" &&
+				content["page"]!.GetValue<string>() == "1" &&
 				content["token"]!.GetValue<string>() == token &&
 				content["timestamp"]!.GetValue<string>() == timeProvider.ToUnixTimeMilliseconds().ToString()),
 			Arg.Is(secretKey))
@@ -214,8 +214,8 @@ public class GameApiClient_ALLWagerUnitTest
 		_ = fakeCryptographyUtensil.Encrypt(
 			source: Arg.Is<JsonNode>(content => content["dateStart"]!.GetValue<string>() == "2024-07-26 06:00:00" &&
 				content["dateEnd"]!.GetValue<string>() == "2024-07-26 06:30:00" &&
-				content["settle"]!.GetValue<int>() == 1 &&
-				content["page"]!.GetValue<int>() == 1 &&
+				content["settle"]!.GetValue<string>() == "1" &&
+				content["page"]!.GetValue<string>() == "1" &&
 				content["token"]!.GetValue<string>() == token &&
 				content["timestamp"]!.GetValue<string>() == timeProvider.ToUnixTimeMilliseconds().ToString()),
 			Arg.Is(secretKey))
@@ -376,8 +376,8 @@ public class GameApiClient_ALLWagerUnitTest
 		_ = fakeCryptographyUtensil.Encrypt(
 			source: Arg.Is<JsonNode>(content => content["dateStart"]!.GetValue<string>() == "2024-07-26 04:30:00" &&
 				content["dateEnd"]!.GetValue<string>() == "2024-07-26 05:00:00" &&
-				content["settle"]!.GetValue<int>() == 1 &&
-				content["page"]!.GetValue<int>() == 1 &&
+				content["settle"]!.GetValue<string>() == "1" &&
+				content["page"]!.GetValue<string>() == "1" &&
 				content["token"]!.GetValue<string>() == token &&
 				content["timestamp"]!.GetValue<string>() == timeProvider.ToUnixTimeMilliseconds().ToString()),
 			Arg.Is(secretKey))
