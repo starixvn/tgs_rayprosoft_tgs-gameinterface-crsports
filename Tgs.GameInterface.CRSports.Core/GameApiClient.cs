@@ -50,8 +50,8 @@ internal class GameApiClient : IGameApiClient
 		{
 			["dateStart"] = _dateTimeConverter.DatetimeConvertToString(dateStart),
 			["dateEnd"] = _dateTimeConverter.DatetimeConvertToString(dateEnd),
-			["page"] = page,
-			["settle"] = settle,
+			["page"] = page.ToString(),
+			["settle"] = settle.ToString(),
 			["langx"] = "en-us"
 		};
 
@@ -193,7 +193,7 @@ internal class GameApiClient : IGameApiClient
 		var parameters = new JsonObject
 		{
 			["memname"] = memname,
-			["amount"] = amount,
+			["amount"] = amount.ToString(),
 			["payno"] = payno
 		};
 
@@ -337,7 +337,7 @@ internal class GameApiClient : IGameApiClient
 		var parameters = new JsonObject
 		{
 			["memname"] = memname,
-			["amount"] = amount,
+			["amount"] = amount.ToString(),
 			["payno"] = payno
 		};
 
