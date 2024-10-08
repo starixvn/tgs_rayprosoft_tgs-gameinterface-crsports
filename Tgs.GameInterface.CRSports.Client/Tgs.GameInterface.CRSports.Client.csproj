@@ -7,7 +7,7 @@
 	</PropertyGroup>
 	
 	<PropertyGroup>
-		<Version>1.0.3</Version>
+		<Version>8.0.1</Version>
 		<Authors>Raypro</Authors>
 		<PackageProjectUrl>https://gitlab.com/rayprosoft/tgs-gameinterface-crsports</PackageProjectUrl>
 		<RepositoryUrl>https://gitlab.com/rayprosoft/tgs-gameinterface-crsports.git</RepositoryUrl>
@@ -21,9 +21,9 @@
 
 
 	<ItemGroup>
-		<PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.65.0" />
-		<PackageReference Include="Grpc.Net.ClientFactory" Version="2.65.0" />
-		<PackageReference Include="Grpc.Tools" Version="2.65.0">
+		<PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.66.0" />
+		<PackageReference Include="Grpc.Net.ClientFactory" Version="2.66.0" />
+		<PackageReference Include="Grpc.Tools" Version="2.66.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
